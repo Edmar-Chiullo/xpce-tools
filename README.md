@@ -1,3 +1,7 @@
+# xpce-tools
+É um sistema web completo de gestão logística e operacional para centros de distribuição.
+> 42c23d35b5648c43672f849758e1b79025594848
+
 *O que é o PCE Tools?*
 
 É um sistema web completo de gestão logística e operacional para centros de distribuição, construído com Next.js + Firebase. Ele unifica operações de portaria, recebimento, conferência, picking, endereçamento e quarentena de produtos em uma única plataforma — com versões Desktop (gestão) e Mobile (operadores de chão de fábrica).
@@ -45,4 +49,4 @@ Módulos identificados:
 > Fale conosco e transforme seu CD!
 >
 > #PCEtools #Logística #CD
----
+
