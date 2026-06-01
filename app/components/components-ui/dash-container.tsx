@@ -1,7 +1,7 @@
 'use client';
 
 import { DataSnapshot, onChildAdded, onChildChanged, ref } from "firebase/database";
-import { db } from "@/firebasekey/keyapi";
+import { db } from "@/app/firebasekey/keyapi";
 
 import { Bar } from 'react-chartjs-2';
 import {
