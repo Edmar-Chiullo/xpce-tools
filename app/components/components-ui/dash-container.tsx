@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 
 import { DataSnapshot, onChildAdded, onChildChanged, ref } from "firebase/database";
 import { db } from "@/firebasekey/keyapi";
@@ -13,6 +12,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartOptions,
 } from 'chart.js';
 
 import { useState, useEffect, useMemo } from "react";
@@ -23,6 +23,27 @@ import { fullDate, fullDatePrint, hourPrint } from "@/app/utils/ger-date";
 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+// interface Options {
+//     responsive: boolean;
+//     plugins: {
+//         legend: { position: string };
+//         title: { display: boolean; text: string };
+//     };
+// }
+
+const options: ChartOptions<'bar'> = {
+  responsive: true,
+  plugins: {
+    legend: { 
+      position: 'top' as const // O 'as const' ajuda a garantir o tipo literal
+    },
+    title: { 
+      display: true, 
+      text: 'Atividades PCE' 
+    },
+  },
+};
 
 function ContainerDash() {
 
@@ -36,7 +57,7 @@ function ContainerDash() {
     const dbPath = `${strDate.slice(4, 8)}/${strDate.slice(2, 8)}/${13}/${'1046'}/pce`;
     const dbRef = ref(db, dbPath); //strDate.slice(0, 2)
 
-    const options = {
+    const options: ChartOptions<'bar'> = {
         responsive: true,
         plugins: {
             legend: { position: 'top' },
