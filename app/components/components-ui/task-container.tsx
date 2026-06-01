@@ -15,16 +15,20 @@ function ContainerTasks() {
     const [searchTerm, setSearchTerm] = useState('');
 
     const itemsPerPage = 8;
+    
+    const ano = '2026';
+    const mesano = '052026';
+    const dia = '13';
 
     const strDate = fullDate().replace(/\//g, '');
-    const dbPath = `${strDate.slice(4, 8)}/${strDate.slice(2, 8)}/${13}/${'1046'}/pce`;
+    const dbPath = `${ano}/${mesano}/${dia}/${'1046'}/pce`;
     const dbRef = ref(db, dbPath); //strDate.slice(0, 2)
 
     useEffect(() => {
         const unsubscribeAdd = onChildAdded(dbRef, (snapshot: DataSnapshot) => {
             if (snapshot.exists()) {
                 const value = Object.values(snapshot.val())
-             
+                console.log(value)
                 const newActivitys = value.map(activity => activity as ActivityProps);
                 setTasks(prevTasks => [...prevTasks, ...newActivitys])
             }

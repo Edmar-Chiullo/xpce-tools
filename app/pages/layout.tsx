@@ -25,11 +25,11 @@ export default function RootLayout({
 }>) {
   return (  
     <div className="flex w-full h-screen px-3 py-2 bg-zinc-100 rounded-2xl">
-      <div className="flex flex-col justify-around items-center gap-2.5 pb-4 w-40 min-h-full bg-zinc-950 rounded-2xl">
+      <div className="flex flex-col justify-around items-center gap-2.5 pb-4 w-24 min-h-full bg-zinc-950 rounded-2xl">
         <div className="text-center">
-          <h1 className="text-2xl"><strong>PCE</strong>-<span className="text-lg">Tools</span></h1>
+          <h1 className="text-2xl"><strong>PCE</strong></h1>
         </div>
-        <div className="w-[50%] h-[70%]">
+        <div className="w-[30%] h-[70%] border-gray-50">
           <Navbar />
         </div>
       </div>

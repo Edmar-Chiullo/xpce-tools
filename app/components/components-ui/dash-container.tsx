@@ -40,18 +40,18 @@ function ContainerDash() {
         responsive: true,
         plugins: {
             legend: { position: 'top' },
-            title: { display: true, text: 'Meu Primeiro Gráfico' },
+            title: { display: true, text: 'Atividades PCE' },
         },
     };
 
-    const labels = ['Janeiro', 'Fevereiro', 'Março'];
+    const labels = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'];
 
     const data = {
         labels,
         datasets: [
             {
-            label: 'Vendas',
-            data: [12, 19, 3],
+            label: 'Atividades',
+            data: [12, 19, 3, 5, 8, 10],
             backgroundColor: 'rgba(75, 192, 192, 0.5)',
             },
         ],
@@ -113,15 +113,15 @@ function ContainerDash() {
 
     
   return (
-    <div className="container-dash flex flex-col gap-6 w-full h-full">
+    <div className="container-dash flex flex-col justify-center gap-6 w-full h-full">
         <div className="flex justify-around w-full h-0[20%] p-2 border border-zinc-900 rounded-lg">
             <Card title="Tasks" description="Manage your tasks" />
             <Card title="Tasks" description="Manage your tasks" />
             <Card title="Tasks" description="Manage your tasks" />
             <Card title="Tasks" description="Manage your tasks" />
         </div>
-        <div className=" h-[79%] p-2 border border-zinc-900 rounded-lg">
-            <Bar options={options} data={data} />
+        <div className="w-full h-[79%] p-2 border border-zinc-900 rounded-lg">
+            <Bar className="w-full h-full" options={options} data={data} />
         </div>
     </div>
   );
