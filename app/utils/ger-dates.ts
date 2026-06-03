@@ -37,3 +37,9 @@ export function fullDatePrint(date:number | string) {
 
     return `${day}/${month}/${year}`
 }
+
+export function dateDb() {
+    const date = Date.now()  
+
+    return date
+}

@@ -1,3 +1,4 @@
+import Link from "next/link"
 
 export default function QuarentenaFracionada() {
     function iniciarAtividade() {
@@ -10,9 +11,11 @@ export default function QuarentenaFracionada() {
             <h1 className="text-zinc-950"><strong>QUARENTENA FRACIONADA</strong></h1>
             <div className="flex flex-col gap-2 w-full h-full mt-6">
                 <h3>Iniciar atividade?</h3>
-                <button className="w-full text-lg font-light bg-zinc-950 text-zinc-50 h-10 rounded-md">
-                    Iniciar
-                </button>
+                <Link href="/pages/kit-ferramentas/quarentena-fracionada/form" className="w-full">
+                    <div className="w-full text-lg font-semibold text-center bg-zinc-950 text-zinc-50 h-10 rounded-md">
+                        Iniciar
+                    </div>
+                </Link>            
             </div>
         </div>
     )

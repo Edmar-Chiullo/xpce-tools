@@ -1,4 +1,9 @@
-type Activity = {
+
+export interface AtividadeProps {
+    activity: Atividade
+}
+
+export interface Atividade {
     activityUserCenter: '',
     activityID: '',
     activityUserID: '',
@@ -13,6 +18,17 @@ type Activity = {
     activityFinisDate: 0
 }
 
-export interface ActivityProps {
-    activity: Activity
+export interface DadosDaAtividade {
+    activityID?: string
+    activityName?: string
+    activityLocalWork?: string
+    activityInitDate?: string
+    activityState?: string
+    activityTasks?: string
+    activityUserID?: string
+    activtyUserName?: string
+    activityUserCenter?: string
+    activityFinisDate?: string
 }
+
+

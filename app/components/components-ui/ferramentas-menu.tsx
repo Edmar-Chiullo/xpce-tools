@@ -6,7 +6,7 @@ export default function ColectorMenu() {
     const router = useRouter()
 
     return (
-        <div className="flex flex-col gap-4 w-full h-[97%] text-zinc-400 border border-zinc-500 p-4">
+        <div className="flex flex-col gap-4 w-full h-[97%] text-zinc-400 border border-zinc-500 rounded-2xl p-4">
             <ul className="flex flex-col gap-2 w-full mt-6 text-zinc-50 text-center">
                 <li onClick={() => router.push("/pages/kit-ferramentas/rotativo-picking")} className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 p-2 rounded-md">Rotativo de picking</li>
                 <li onClick={() => router.push("/pages/kit-ferramentas/aereo-vazio")} className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 p-2 rounded-md">Aéreo vazio</li>

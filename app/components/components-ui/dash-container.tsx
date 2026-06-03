@@ -19,7 +19,7 @@ import { useState, useEffect, useMemo } from "react";
 
 import Card from "@/app/components/components-ui/card";
 import { ActivityProps } from "@/app/types/TasksProps";
-import { fullDate, fullDatePrint, hourPrint } from "@/app/utils/ger-date";
+import { fullDate, fullDatePrint, hourPrint } from "@/app/utils/ger-dates";
 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
