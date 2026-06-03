@@ -5,12 +5,12 @@ import { db } from "@/app/firebasekey/keyapi";
 
 import { useState, useEffect, useMemo } from "react";
 
-import { ActivityProps } from "@/app/types/TasksProps";
+import { AtividadeProps } from "@/app/types/TasksProps";
 import { fullDate, fullDatePrint, hourPrint } from "@/app/utils/ger-dates";
 
 function ContainerTasks() {
 
-    const [tasks, setTasks] = useState<ActivityProps[]>([])
+    const [tasks, setTasks] = useState<AtividadeProps[]>([])
     const [currentPage, setCurrentPage] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -29,17 +29,17 @@ function ContainerTasks() {
             if (snapshot.exists()) {
                 const value = Object.values(snapshot.val())
                 console.log(value)
-                const newActivitys = value.map(activity => activity as ActivityProps);
+                const newActivitys = value.map(activity => activity as AtividadeProps);
                 setTasks(prevTasks => [...prevTasks, ...newActivitys])
             }
         });
 
         const unsubscribeChange = onChildChanged(dbRef, (snapshot: DataSnapshot) => {
             if (snapshot.exists()) {
-                const value = Object.values(snapshot.val() as ActivityProps)
+                const value = Object.values(snapshot.val() as AtividadeProps[])
 
-                setTasks((prev:ActivityProps[]) => {
-                    return prev.map((task: ActivityProps) => {
+                setTasks((prev:AtividadeProps[]) => {
+                    return prev.map((task: AtividadeProps) => {
                         const foundUpdated = value.find(
                             updated => updated.activity.activityID === task.activity.activityID
                         );

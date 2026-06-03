@@ -18,19 +18,11 @@ import {
 import { useState, useEffect, useMemo } from "react";
 
 import Card from "@/app/components/components-ui/card";
-import { ActivityProps } from "@/app/types/TasksProps";
-import { fullDate, fullDatePrint, hourPrint } from "@/app/utils/ger-dates";
+import { AtividadeProps } from "@/app/types/TasksProps";
+import { fullDate } from "@/app/utils/ger-dates";
 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-// interface Options {
-//     responsive: boolean;
-//     plugins: {
-//         legend: { position: string };
-//         title: { display: boolean; text: string };
-//     };
-// }
 
 const options: ChartOptions<'bar'> = {
   responsive: true,
@@ -47,7 +39,7 @@ const options: ChartOptions<'bar'> = {
 
 function ContainerDash() {
 
-    const [tasks, setTasks] = useState<ActivityProps[]>([])
+    const [tasks, setTasks] = useState<AtividadeProps[]>([])
     const [currentPage, setCurrentPage] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -83,17 +75,17 @@ function ContainerDash() {
             if (snapshot.exists()) {
                 const value = Object.values(snapshot.val())
              
-                const newActivitys = value.map(activity => activity as ActivityProps);
+                const newActivitys = value.map(activity => activity as AtividadeProps);
                 setTasks(prevTasks => [...prevTasks, ...newActivitys])
             }
         });
 
         const unsubscribeChange = onChildChanged(dbRef, (snapshot: DataSnapshot) => {
             if (snapshot.exists()) {
-                const value = Object.values(snapshot.val() as ActivityProps)
+                const value = Object.values(snapshot.val() as AtividadeProps[]);
 
-                setTasks((prev:ActivityProps[]) => {
-                    return prev.map((task: ActivityProps) => {
+                setTasks((prev: AtividadeProps[]) => {
+                    return prev.map((task: AtividadeProps) => {
                         const foundUpdated = value.find(
                             updated => updated.activity.activityID === task.activity.activityID
                         );

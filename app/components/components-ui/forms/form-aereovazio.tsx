@@ -1,17 +1,14 @@
 'use client'
 
-import { useEffect } from "react"
 import z from "zod"
 import { useForm } from "react-hook-form"
 
-import { push, ref, update } from "firebase/database"
-import { db } from "@/app/firebasekey/keyapi"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { SchemaAereoVazio } from "@/app/schemas/aereovazio"
 import { DadosDaAtividade } from "@/app/types/TasksProps" 
 
-import { fullDate, fullDatePrint, dateDb } from "@/app/utils/ger-dates"
+import { dateDb } from "@/app/utils/ger-dates"
 
 export default function EnderecoVazio({ activity }: { activity: DadosDaAtividade | any }) {
 
@@ -24,67 +21,7 @@ export default function EnderecoVazio({ activity }: { activity: DadosDaAtividade
     },
   })  
 
-//   useEffect(() => {
-//     const inputEnd:any = document.querySelector('.loadAddress')
-//     inputEnd.focus()
-//   }, [])
-
-//   async function pushTaskActivity(values:any) {
-//       const strDate = fullDate()
-//       .replace('/','')
-//       .replace('/','')
-  
-//       const path = `${strDate.slice(4,8)}/${strDate.slice(2,8)}/${strDate.slice(0,2)}/${values.activityUserCenter}/pce/${values.activityName}/${values.activityID}/activity/activityTasks`;
-//       try {
-//           await push(ref(db, path, ), {
-//               activity: values
-//           });
-          
-//           return {
-//               success: true,
-//               message: 'Dados salvo com sucesso.'
-//           }
-//       } catch(erro) {
-//           return {
-//               success: false,
-//               message: 'Falha gravar o endereço!'
-//           };
-//       }
-//   }
-  
-//   async function finishActivity(activity:any) {
-//     const strDate = fullDatePrint(activity.activityInitDate)
-//     .replace('/','')
-//     .replace('/','')
-  
-//     const path = `${strDate.slice(4,8)}/${strDate.slice(2,8)}/${strDate.slice(0,2)}/${activity.activityUserCenter}/pce/${activity.activityName}/${activity.activityID}/activity/activityFinisDate`;
-//     const pathState = `${strDate.slice(4,8)}/${strDate.slice(2,8)}/${strDate.slice(0,2)}/${activity.activityUserCenter}/pce/${activity.activityName}/${activity.activityID}/activity/activityState`;
-//     try {
-//         const date = dateDb()
-//         await update(ref(db), {
-//             [path]: date,
-//             [pathState]: false,
-//         });
-//     } catch(erro) {
-//         return {
-//             success: false,
-//             message: 'Falha ao finalizar a atividade'
-//         };
-//     }
-//   }
-  
-
   function getActivity(act: DadosDaAtividade) {
-
-    const atividadeData = {
-      activityUserCenter: activity.activityUserCenter,
-      activityID: activity.activityID,
-      activityName: activity.activityName,
-      activityInitDate: activity.activityInitDate
-    }
-
-    //finishActivity(atividadeData)
-
     window.location.reload()
   }
 
