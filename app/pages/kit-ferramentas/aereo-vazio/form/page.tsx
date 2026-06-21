@@ -1,4 +1,4 @@
-import EnderecoVazio from "@/app/components/components-ui/forms/form-aereovazio";
+import EnderecoVazio from "@/app/components/components-ui/forms-coletor/form-aereovazio";
 
 export default function appOperator() {
     return (

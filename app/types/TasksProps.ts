@@ -1,21 +1,23 @@
-
 export interface AtividadeProps {
     activity: Atividade
+    _firebaseKey?: string
 }
 
 export interface Atividade {
-    activityUserCenter: '',
-    activityID: '',
-    activityUserID: '',
-    activtyUserName: '',
-    activityName: '',
-    activityState: false,
-    activityLocalWork: '',
-    activityTasks: {},
-    activityStreet: '',
-    activitySide: '',
-    activityInitDate: 0,
-    activityFinisDate: 0
+    activityID: string
+    activityName: string
+    activityUserCenter: string
+    activityUserID: string
+    activtyUserName: string
+    activityState: boolean
+    activityLocalWork: string
+    activityStreet: string
+    activitySide: string
+    activityInitDate: number
+    activityFinishDate: number
+    activityDate: string
+    activityDateCenter: string
+    activityDateCenterID: string
 }
 
 export interface DadosDaAtividade {
@@ -24,11 +26,33 @@ export interface DadosDaAtividade {
     activityLocalWork?: string
     activityInitDate?: string
     activityState?: string
-    activityTasks?: string
     activityUserID?: string
     activtyUserName?: string
     activityUserCenter?: string
-    activityFinisDate?: string
+    activityFinishDate?: string
 }
 
+export interface TaskItem {
+    activityRef: string
+    activityID: string
+    activityName: string
+    activityUserCenter: string
+    activityDate: string
+    taskType: string
+    loadAddress?: string
+    loadProduct?: string
+    loadQuant?: string
+    loadValid?: string
+    validMaster?: string
+    createdAt: number
+}
 
+export interface UserProps {
+    registrationNumber: string
+    userName: string
+    userPermission: string
+    userLocalWork: string
+    userRegistrationDate: string
+    userPassword: string
+    center: string
+}

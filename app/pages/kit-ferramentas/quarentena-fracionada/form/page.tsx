@@ -1,4 +1,4 @@
-import FormQuarentenaFracionada from "@/app/components/components-ui/forms/form-quarentena-fracionada"
+import FormQuarentenaFracionada from "@/app/components/components-ui/forms-coletor/form-quarentena-fracionada"
 
 export default function QuarentenaFracionada() {
     function iniciarAtividade() {

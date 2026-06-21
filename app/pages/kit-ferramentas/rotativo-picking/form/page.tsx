@@ -1,4 +1,4 @@
-import FormRotativoPicking from "@/app/components/components-ui/forms/form-rotativo-picking";
+import FormRotativoPicking from "@/app/components/components-ui/forms-coletor/form-rotativo-picking";
 
 export default function RotativoPicking() {
     

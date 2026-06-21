@@ -1,4 +1,4 @@
-import FormValidarEnderecoProduto from "@/app/components/components-ui/forms/form-validacao-produto"
+import FormValidarEnderecoProduto from "@/app/components/components-ui/forms-coletor/form-validacao-produto"
 
 export default function ValidarEnderecoProduto() {
     function iniciarAtividade() {

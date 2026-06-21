@@ -1,4 +1,4 @@
-import FormValidaMasterExpedicao from "@/app/components/components-ui/forms/form-valida-master-expedicao"
+import FormValidaMasterExpedicao from "@/app/components/components-ui/forms-coletor/form-valida-master-expedicao"
 
 
 export default function ValidaMasterExpedicao() {
