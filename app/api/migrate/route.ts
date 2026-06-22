@@ -83,20 +83,6 @@ async function scanOldData(): Promise<ScanResult> {
     }
 }
 
-function findDayInRoot(
-    rootVal: Record<string, any>,
-    targetDate: string
-): Record<string, any> | null {
-    const [year, month, day] = targetDate.split('-')
-    const yearVal = (rootVal as any)?.[year] as Record<string, any> | undefined
-    if (!yearVal) return null
-
-    const monthVal = (yearVal as any)?.[`${year}${month}`] ?? (yearVal as any)?.[month]
-    if (!monthVal) return null
-
-    return (monthVal as any)?.[day] as Record<string, any> | null
-}
-
 async function migrateDate(
     adminDb: ReturnType<typeof getAdminDb>,
     dayVal: Record<string, any>,
@@ -207,68 +193,21 @@ export async function POST(req: Request) {
         const adminDb = getAdminDb()
 
         if (date) {
-            const rootSnap = await adminDb.ref('/').once('value')
-            if (!rootSnap.exists()) {
-                return NextResponse.json({ error: "Nenhum dado encontrado." }, { status: 400 })
+            const [year, month, day] = date.split('-')
+            const yearMonth = `${year}${month}`
+
+            let daySnap = await adminDb.ref(`${year}/${yearMonth}/${day}`).once('value')
+            if (!daySnap.exists()) {
+                daySnap = await adminDb.ref(`${year}/${month}/${day}`).once('value')
             }
-            const rootVal = rootSnap.val() as Record<string, any>
-            const dayVal = findDayInRoot(rootVal, date)
-            if (!dayVal) {
+            if (!daySnap.exists()) {
                 return NextResponse.json({ error: `Nenhum dado para a data ${date}.` }, { status: 404 })
             }
+
+            const dayVal = daySnap.val() as Record<string, any>
             const result = await migrateDate(adminDb, dayVal, date)
             return NextResponse.json({ success: true, ...result, date })
         }
-
-        if (dates && dates.length > 0) {
-            const rootSnap = await adminDb.ref('/').once('value')
-            if (!rootSnap.exists()) {
-                return NextResponse.json({ error: "Nenhum dado encontrado." }, { status: 400 })
-            }
-            const rootVal = rootSnap.val() as Record<string, any>
-
-            let totalActivities = 0
-            let totalTasks = 0
-
-            for (const d of dates) {
-                const dayVal = findDayInRoot(rootVal, d)
-                if (!dayVal) continue
-                const result = await migrateDate(adminDb, dayVal, d)
-                totalActivities += result.activities
-                totalTasks += result.tasks
-            }
-
-            return NextResponse.json({
-                success: true,
-                activitiesMigrated: totalActivities,
-                tasksMigrated: totalTasks,
-            })
-        }
-
-        const scanResult = await scanOldData()
-        if (scanResult.totalActivities === 0) {
-            return NextResponse.json({ error: "Nenhum dado encontrado para migrar." }, { status: 400 })
-        }
-
-        const rootSnap = await adminDb.ref('/').once('value')
-        const rootVal = rootSnap.val() as Record<string, any>
-
-        let totalActivities = 0
-        let totalTasks = 0
-
-        for (const d of scanResult.dates) {
-            const dayVal = findDayInRoot(rootVal, d)
-            if (!dayVal) continue
-            const result = await migrateDate(adminDb, dayVal, d)
-            totalActivities += result.activities
-            totalTasks += result.tasks
-        }
-
-        return NextResponse.json({
-            success: true,
-            activitiesMigrated: totalActivities,
-            tasksMigrated: totalTasks,
-        })
     } catch (err) {
         console.error("Migrate error:", err)
         return NextResponse.json(

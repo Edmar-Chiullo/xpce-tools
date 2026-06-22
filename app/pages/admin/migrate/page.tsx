@@ -90,31 +90,24 @@ export default function MigratePage() {
         setRunning(true)
         setStatus(null)
 
-        try {
-            setProgress("Migrando todas as datas...")
-            const res = await fetch('/api/migrate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ dates: scanResult.dates }),
-            })
-            const data = await res.json()
+        let totalActivities = 0
+        let totalTasks = 0
 
-            if (!res.ok) throw new Error(data.error || "Erro na migração em lote")
-
-            setMigProgress(prev => {
-                const next = { ...prev }
-                scanResult.dates.forEach(d => { next[d] = 'done' })
-                return next
-            })
-
-            setStatus({
-                message: `Migração concluída! ${data.activitiesMigrated} atividades e ${data.tasksMigrated} tarefas migradas.`,
-                type: 'success',
-            })
-        } catch (err) {
-            setStatus({ message: `Erro na migração: ${err}`, type: 'error' })
+        for (const date of scanResult.dates) {
+            setProgress(`Migrando ${date}...`)
+            try {
+                const data = await migrateSingleDate(date)
+                totalActivities += data.activities || 0
+                totalTasks += data.tasks || 0
+            } catch {
+                setMigProgress(prev => ({ ...prev, [date]: 'error' }))
+            }
         }
 
+        setStatus({
+            message: `Migração concluída! ${totalActivities} atividades e ${totalTasks} tarefas migradas.`,
+            type: 'success',
+        })
         setRunning(false)
         setProgress("")
     }
