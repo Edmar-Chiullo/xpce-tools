@@ -194,9 +194,9 @@ export async function POST(req: Request) {
 
         if (date) {
             const [year, month, day] = date.split('-')
-            const yearMonth = `${year}${month}`
+            const monthYear = `${month}${year}`
 
-            let daySnap = await adminDb.ref(`${year}/${yearMonth}/${day}`).once('value')
+            let daySnap = await adminDb.ref(`${year}/${monthYear}/${day}`).once('value')
             if (!daySnap.exists()) {
                 daySnap = await adminDb.ref(`${year}/${month}/${day}`).once('value')
             }
@@ -208,6 +208,11 @@ export async function POST(req: Request) {
             const result = await migrateDate(adminDb, dayVal, date)
             return NextResponse.json({ success: true, ...result, date })
         }
+
+        return NextResponse.json(
+            { error: "Parâmetro 'date' é obrigatório." },
+            { status: 400 }
+        )
     } catch (err) {
         console.error("Migrate error:", err)
         return NextResponse.json(
