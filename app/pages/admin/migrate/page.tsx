@@ -90,34 +90,33 @@ export default function MigratePage() {
         setRunning(true)
         setStatus(null)
 
-        let totalActivities = 0
-        let totalTasks = 0
-        let errors: string[] = []
+        try {
+            setProgress("Migrando todas as datas...")
+            const res = await fetch('/api/migrate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dates: scanResult.dates }),
+            })
+            const data = await res.json()
 
-        for (const date of scanResult.dates) {
-            try {
-                const data = await migrateSingleDate(date)
-                totalActivities += data.activitiesMigrated || data.activities || 0
-                totalTasks += data.tasksMigrated || data.tasks || 0
-            } catch (err) {
-                errors.push(`${date}: ${err}`)
-            }
+            if (!res.ok) throw new Error(data.error || "Erro na migração em lote")
+
+            setMigProgress(prev => {
+                const next = { ...prev }
+                scanResult.dates.forEach(d => { next[d] = 'done' })
+                return next
+            })
+
+            setStatus({
+                message: `Migração concluída! ${data.activitiesMigrated} atividades e ${data.tasksMigrated} tarefas migradas.`,
+                type: 'success',
+            })
+        } catch (err) {
+            setStatus({ message: `Erro na migração: ${err}`, type: 'error' })
         }
 
         setRunning(false)
         setProgress("")
-
-        if (errors.length === 0) {
-            setStatus({
-                message: `Migração concluída! ${totalActivities} atividades e ${totalTasks} tarefas migradas.`,
-                type: 'success',
-            })
-        } else {
-            setStatus({
-                message: `Migração parcial. ${totalActivities} atividades e ${totalTasks} tarefas migradas. ${errors.length} erro(s): ${errors.join('; ')}`,
-                type: 'error',
-            })
-        }
     }
 
     async function handleMigrateDate(date: string) {

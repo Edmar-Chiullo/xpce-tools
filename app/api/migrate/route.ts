@@ -91,13 +91,10 @@ function findDayInRoot(
     const yearVal = (rootVal as any)?.[year] as Record<string, any> | undefined
     if (!yearVal) return null
 
-    for (const [monthKey, monthVal] of Object.entries(yearVal)) {
-        if (monthKey === `${year}${month}` || monthKey === month || monthKey.includes(month)) {
-            const dayVal = (monthVal as any)?.[day] as Record<string, any> | undefined
-            if (dayVal) return dayVal
-        }
-    }
-    return null
+    const monthVal = (yearVal as any)?.[`${year}${month}`] ?? (yearVal as any)?.[month]
+    if (!monthVal) return null
+
+    return (monthVal as any)?.[day] as Record<string, any> | null
 }
 
 async function migrateDate(
@@ -105,6 +102,7 @@ async function migrateDate(
     dayVal: Record<string, any>,
     activityDate: string
 ): Promise<{ activities: number; tasks: number }> {
+    const batch: Record<string, any> = {}
     let activitiesMigrated = 0
     let tasksMigrated = 0
 
@@ -119,8 +117,9 @@ async function migrateDate(
 
                 const activityDateCenter = `${activityDate}_${center}`
                 const activityDateCenterID = `${activityDateCenter}_${activityId}`
+                const activityKey = adminDb.ref('activities').push().key!
 
-                const newActivity = {
+                batch[`activities/${activityKey}`] = {
                     activityID: activity.activityID || activityId,
                     activityName: activity.activityName || activityName,
                     activityUserCenter: activity.activityUserCenter || center,
@@ -136,9 +135,6 @@ async function migrateDate(
                     activityDateCenter,
                     activityDateCenterID,
                 }
-
-                const newActRef = adminDb.ref('activities').push(newActivity)
-                const activityKey = newActRef.key!
                 activitiesMigrated++
 
                 const tasks = (activity as any)?.activityTasks as Record<string, any> | undefined
@@ -147,7 +143,8 @@ async function migrateDate(
                         const taskData = (taskVal as any)?.activity as Record<string, any> | undefined
                         if (!taskData) continue
 
-                        const newTask: Record<string, any> = {
+                        const taskKey = adminDb.ref('tasks').push().key!
+                        const task: Record<string, any> = {
                             activityRef: activityKey,
                             activityID: taskData.activityID || activityId,
                             activityName: taskData.activityName || activityName,
@@ -163,23 +160,27 @@ async function migrateDate(
                         }
 
                         if (taskData.loadAddress && !taskData.loadProduct && !taskData.validMaster) {
-                            newTask.taskType = 'aereo-vazio'
+                            task.taskType = 'aereo-vazio'
                         } else if (taskData.validMaster) {
-                            newTask.taskType = 'valida-master-expedicao'
+                            task.taskType = 'valida-master-expedicao'
                         } else if (taskData.loadProduct && taskData.loadAddress) {
-                            newTask.taskType = 'validacao-produto-endereco'
+                            task.taskType = 'validacao-produto-endereco'
                         } else if (taskData.loadProduct && taskData.loadQuant) {
-                            newTask.taskType = activityName.toLowerCase().includes('quarentena')
+                            task.taskType = activityName.toLowerCase().includes('quarentena')
                                 ? 'quarentena-fracionada'
                                 : 'rotativo-picking'
                         }
 
-                        adminDb.ref('tasks').push(newTask)
+                        batch[`tasks/${taskKey}`] = task
                         tasksMigrated++
                     }
                 }
             }
         }
+    }
+
+    if (Object.keys(batch).length > 0) {
+        await adminDb.ref().update(batch)
     }
 
     return { activities: activitiesMigrated, tasks: tasksMigrated }
@@ -201,17 +202,16 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json().catch(() => ({}))
-        const { date } = body as { date?: string }
+        const { date, dates } = body as { date?: string; dates?: string[] }
 
         const adminDb = getAdminDb()
-        const rootSnap = await adminDb.ref('/').once('value')
-        if (!rootSnap.exists()) {
-            return NextResponse.json({ error: "Nenhum dado encontrado." }, { status: 400 })
-        }
-
-        const rootVal = rootSnap.val() as Record<string, any>
 
         if (date) {
+            const rootSnap = await adminDb.ref('/').once('value')
+            if (!rootSnap.exists()) {
+                return NextResponse.json({ error: "Nenhum dado encontrado." }, { status: 400 })
+            }
+            const rootVal = rootSnap.val() as Record<string, any>
             const dayVal = findDayInRoot(rootVal, date)
             if (!dayVal) {
                 return NextResponse.json({ error: `Nenhum dado para a data ${date}.` }, { status: 404 })
@@ -220,18 +220,46 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, ...result, date })
         }
 
+        if (dates && dates.length > 0) {
+            const rootSnap = await adminDb.ref('/').once('value')
+            if (!rootSnap.exists()) {
+                return NextResponse.json({ error: "Nenhum dado encontrado." }, { status: 400 })
+            }
+            const rootVal = rootSnap.val() as Record<string, any>
+
+            let totalActivities = 0
+            let totalTasks = 0
+
+            for (const d of dates) {
+                const dayVal = findDayInRoot(rootVal, d)
+                if (!dayVal) continue
+                const result = await migrateDate(adminDb, dayVal, d)
+                totalActivities += result.activities
+                totalTasks += result.tasks
+            }
+
+            return NextResponse.json({
+                success: true,
+                activitiesMigrated: totalActivities,
+                tasksMigrated: totalTasks,
+            })
+        }
+
         const scanResult = await scanOldData()
         if (scanResult.totalActivities === 0) {
             return NextResponse.json({ error: "Nenhum dado encontrado para migrar." }, { status: 400 })
         }
 
+        const rootSnap = await adminDb.ref('/').once('value')
+        const rootVal = rootSnap.val() as Record<string, any>
+
         let totalActivities = 0
         let totalTasks = 0
 
-        for (const date of scanResult.dates) {
-            const dayVal = findDayInRoot(rootVal, date)
+        for (const d of scanResult.dates) {
+            const dayVal = findDayInRoot(rootVal, d)
             if (!dayVal) continue
-            const result = await migrateDate(adminDb, dayVal, date)
+            const result = await migrateDate(adminDb, dayVal, d)
             totalActivities += result.activities
             totalTasks += result.tasks
         }
