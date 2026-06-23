@@ -5,19 +5,30 @@ import { useSession, signOut } from "next-auth/react";
 import clsx from "clsx";
 import Link from "next/link";
 import { useIdleLogout } from "@/app/hooks/useIdleLogout";
-import { LayoutDashboard, ClipboardList, Wrench, Users, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Wrench, Users, Settings, LogOut, Home } from "lucide-react";
 
-const NAV_ITEMS = [
-  { href: "/pages", label: "Início", icon: LayoutDashboard },
-  { href: "/pages/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/pages/taskpainel", label: "Tarefas", icon: ClipboardList },
-  { href: "/pages/kit-ferramentas", label: "Ferramentas", icon: Wrench },
-  { href: "/pages/cadastro/user", label: "Usuários", icon: Users },
-] as const;
+interface NavItem {
+  href: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  permissions: string[]
+}
 
-const ADMIN_ITEMS = [
-  { href: "/pages/admin/migrate", label: "Migração", icon: Settings },
-] as const;
+const NAV_ITEMS: NavItem[] = [
+  { href: "/pages", label: "Início", icon: Home, permissions: ["admin", "gerente", "pce-analytics", "pce-operation"] },
+  { href: "/pages/dashboard", label: "Dashboard", icon: LayoutDashboard, permissions: ["admin", "gerente", "pce-analytics"] },
+  { href: "/pages/taskpainel", label: "Tarefas", icon: ClipboardList, permissions: ["admin", "gerente", "pce-analytics"] },
+  { href: "/pages/kit-ferramentas", label: "Ferramentas", icon: Wrench, permissions: ["admin", "gerente", "pce-analytics", "pce-operation"] },
+  { href: "/pages/users", label: "Usuários", icon: Users, permissions: ["admin", "gerente"] },
+  { href: "/pages/admin/migrate", label: "Migração", icon: Settings, permissions: ["admin"] },
+];
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: "Administrador",
+  gerente: "Gerente",
+  "pce-analytics": "Analista",
+  "pce-operation": "Auxiliar",
+}
 
 export default function Navbar() {
   useIdleLogout()
@@ -28,11 +39,11 @@ export default function Navbar() {
   const initials = user?.name
     ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : '??'
-  const role = user?.permission === 'admin' ? 'Administrador' : 'Operador'
+  const roleLabel = ROLE_LABELS[user?.permission || ''] || 'Operador'
 
-  const allItems = user?.permission === 'admin'
-    ? [...NAV_ITEMS, ...ADMIN_ITEMS]
-    : NAV_ITEMS
+  const visibleItems = NAV_ITEMS.filter(item =>
+    item.permissions.includes(user?.permission || '')
+  )
 
   return (
     <div className="flex flex-col h-full text-sidebar-fg">
@@ -47,12 +58,12 @@ export default function Navbar() {
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">{user?.name || 'Usuário'}</p>
-          <p className="text-xs text-sidebar-muted">{role}</p>
+          <p className="text-xs text-sidebar-muted">{roleLabel}</p>
         </div>
       </div>
 
       <nav className="flex flex-col gap-1 flex-1">
-        {allItems.map(({ href, label, icon: Icon }) => {
+        {visibleItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || (href !== '/pages' && pathname.startsWith(href))
           return (
             <Link

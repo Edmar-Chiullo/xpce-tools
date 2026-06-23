@@ -55,4 +55,5 @@ export interface UserProps {
     userRegistrationDate: string
     userPassword: string
     center: string
+    userActive?: boolean
 }

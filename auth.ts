@@ -11,6 +11,7 @@ declare module "next-auth" {
             permission: string
             center: string
             localWork: string
+            userActive?: boolean
         }
     }
 }
@@ -49,6 +50,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     userData = child.val()
                 })
 
+                if (userData.userActive === false) return null
+
                 const valid = await bcrypt.compare(password, userData.userPassword)
                 if (!valid) return null
 
@@ -59,6 +62,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     permission: userData.userPermission,
                     center: userData.center,
                     localWork: userData.userLocalWork,
+                    userActive: userData.userActive !== false,
                 }
             },
         }),
@@ -77,6 +81,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 token.center = (user as any).center
                 token.localWork = (user as any).localWork
                 token.registrationNumber = (user as any).registrationNumber
+                token.userActive = (user as any).userActive
             }
             return token
         },
@@ -86,6 +91,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             session.user.center = token.center as string
             session.user.localWork = token.localWork as string
             session.user.registrationNumber = token.registrationNumber as string
+            session.user.userActive = token.userActive as boolean | undefined
             return session
         },
     },

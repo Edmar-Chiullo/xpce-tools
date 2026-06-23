@@ -1,6 +1,6 @@
 'use client';
 
-import { DataSnapshot, onChildAdded, onChildChanged, ref, query, orderByChild, equalTo } from "firebase/database";
+import { DataSnapshot, onChildAdded, onChildChanged, ref, query, orderByChild, equalTo, get } from "firebase/database";
 import { db } from "@/app/firebasekey/keyapi";
 
 import { Bar } from 'react-chartjs-2';
@@ -24,6 +24,7 @@ import { fullDatePrint, hourPrint } from "@/app/utils/ger-dates";
 import KPICards from "./dash-kpi-cards";
 import DashFeed from "./dash-feed";
 import DashDistribution from "./dash-distribution";
+import DashActivityCards from "./dash-activity-cards";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -42,6 +43,8 @@ function ContainerDash() {
   const [selectedDate, setSelectedDate] = useState(getTodayISO);
   const [loading, setLoading] = useState(true);
 
+  console.log("Selected Date:");
+  
   const dbQuery = query(ref(db, 'activities'), orderByChild('activityDate'), equalTo(selectedDate));
 
   const chartRef = useRef<any>(null);
@@ -103,6 +106,8 @@ function ContainerDash() {
         );
       });
     });
+
+    get(dbQuery).then((snapshot) => { if (!cancelled && !snapshot.exists()) setLoading(false); }).catch(() => { if (!cancelled) setLoading(false); });
 
     return () => {
       cancelled = true;
@@ -172,17 +177,6 @@ function ContainerDash() {
               Carregando
             </span>
           )}
-          <div className="flex gap-1.5">
-            {filterLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={`/pages/dashboard/${href}?date=${selectedDate}`}
-                className="px-3 py-1.5 bg-sidebar-bg text-sidebar-fg text-xs font-medium rounded-lg hover:opacity-80 transition-opacity"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
         </div>
         <button
           onClick={exportDashboard}
@@ -192,6 +186,8 @@ function ContainerDash() {
           Exportar XLSX
         </button>
       </div>
+
+      <DashActivityCards tasks={tasks} selectedDate={selectedDate} />
 
       {!loading && tasks.length === 0 ? (
         <div className="flex items-center justify-center flex-1 text-muted-fg text-lg">
@@ -203,11 +199,11 @@ function ContainerDash() {
 
           <div className="flex gap-6 flex-1 min-h-0">
             <div className="flex flex-col gap-6 flex-1 min-w-0">
-              <div className="flex-1 min-h-[280px] bg-card-bg rounded-[var(--radius)] p-5 shadow-sm border border-border">
+              <div className="flex-1 min-h-70 bg-card-bg rounded-[(--radius)] p-5 shadow-sm border border-border">
                 <Bar ref={chartRef} options={options} data={chartData} />
               </div>
 
-              <div className="bg-card-bg rounded-[var(--radius)] p-5 shadow-sm border border-border">
+              <div className="bg-card-bg rounded-[(--radius)] p-5 shadow-sm border border-border">
                 <h3 className="text-sm font-semibold text-card-fg mb-3">
                   Tarefas do dia ({tasks.length})
                 </h3>

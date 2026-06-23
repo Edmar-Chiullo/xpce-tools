@@ -1,6 +1,6 @@
 'use client';
 
-import { DataSnapshot, onChildAdded, onChildChanged, ref, query, orderByChild, equalTo } from "firebase/database";
+import { DataSnapshot, onChildAdded, onChildChanged, ref, query, orderByChild, equalTo, get } from "firebase/database";
 import { db } from "@/app/firebasekey/keyapi";
 
 import { Bar } from 'react-chartjs-2';
@@ -20,9 +20,9 @@ import * as XLSX from "xlsx";
 import { useSearchParams } from "next/navigation";
 
 import Link from "next/link";
-import Card from "@/app/components/components-ui/card";
-import { AtividadeProps } from "@/app/types/TasksProps";
+import { AtividadeProps, TaskItem } from "@/app/types/TasksProps";
 import { fullDatePrint, hourPrint } from "@/app/utils/ger-dates";
+import { ClipboardList, Warehouse, ScanLine, Plane, Activity, Clock } from "lucide-react";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -40,15 +40,37 @@ const TITLE_MAP: Record<string, { title: string; description: string }> = {
   aereo: { title: 'Aéreo Vazio', description: 'Tarefas de aéreo' },
 };
 
-function getTodayISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+const TASK_TYPE_MAP: Record<string, string> = {
+  quarentena: 'quarentena-fracionada',
+  picking: 'rotativo-picking',
+  endereco: 'validacao-produto-endereco',
+  aereo: 'aereo-vazio',
+};
 
-function formatDateBR(isoDate: string) {
-  const [y, m, d] = isoDate.split('-');
-  return `${d}/${m}/${y}`;
-}
+const DETAIL_COLUMNS: Record<string, { key: string; label: string }[]> = {
+  quarentena: [
+    { key: 'activityID', label: 'Código' },
+    { key: 'loadProduct', label: 'Produto' },
+    { key: 'loadQuant', label: 'Quantidade' },
+    { key: 'loadValid', label: 'Validade' },
+  ],
+  picking: [
+    { key: 'activityID', label: 'Código' },
+    { key: 'loadAddress', label: 'Endereço' },
+    { key: 'loadProduct', label: 'Produto' },
+    { key: 'loadQuant', label: 'Quantidade' },
+    { key: 'loadValid', label: 'Validade' },
+  ],
+  endereco: [
+    { key: 'activityID', label: 'Código' },
+    { key: 'loadAddress', label: 'Endereço' },
+    { key: 'loadProduct', label: 'Produto' },
+  ],
+  aereo: [
+    { key: 'activityID', label: 'Código' },
+    { key: 'loadAddress', label: 'Endereço' },
+  ],
+};
 
 function formatDuration(ms: number) {
   if (ms <= 0) return '-';
@@ -59,6 +81,39 @@ function formatDuration(ms: number) {
   return `${h}h ${m}m ${s}s`;
 }
 
+const KPI_MAP: Record<string, { icon: React.ComponentType<{ className?: string }>; label: string; color: string; bg: string }[]> = {
+  quarentena: [
+    { icon: ClipboardList, label: 'Total de Registros', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { icon: Activity, label: 'Produtos Distintos', color: 'text-amber-500', bg: 'bg-amber-50' },
+    { icon: Clock, label: 'Unidades Contadas', color: 'text-blue-500', bg: 'bg-blue-50' },
+  ],
+  picking: [
+    { icon: Warehouse, label: 'Total de Registros', color: 'text-blue-500', bg: 'bg-blue-50' },
+    { icon: Activity, label: 'Endereços Distintos', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { icon: Clock, label: 'Unidades Separadas', color: 'text-amber-500', bg: 'bg-amber-50' },
+  ],
+  endereco: [
+    { icon: ScanLine, label: 'Total de Registros', color: 'text-amber-500', bg: 'bg-amber-50' },
+    { icon: Activity, label: 'Endereços Distintos', color: 'text-rose-500', bg: 'bg-rose-50' },
+    { icon: Clock, label: 'Produtos Distintos', color: 'text-blue-500', bg: 'bg-blue-50' },
+  ],
+  aereo: [
+    { icon: Plane, label: 'Total de Registros', color: 'text-rose-500', bg: 'bg-rose-50' },
+    { icon: Activity, label: 'Endereços Varridos', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { icon: Clock, label: '—', color: 'text-amber-500', bg: 'bg-amber-50' },
+  ],
+};
+
+function getTodayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function formatDateBR(isoDate: string) {
+  const [y, m, d] = isoDate.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 interface DashTipoProps {
   filterKey: 'quarentena' | 'picking' | 'endereco' | 'aereo';
 }
@@ -67,12 +122,14 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
   const searchParams = useSearchParams();
   const urlDate = searchParams?.get('date');
   const [tasks, setTasks] = useState<AtividadeProps[]>([]);
+  const [tasksData, setTasksData] = useState<TaskItem[]>([]);
   const [selectedDate, setSelectedDate] = useState(
     urlDate && /^\d{4}-\d{2}-\d{2}$/.test(urlDate) ? urlDate : getTodayISO()
   );
   const [loading, setLoading] = useState(true);
 
   const dbQuery = query(ref(db, 'activities'), orderByChild('activityDate'), equalTo(selectedDate));
+  const tasksQuery = query(ref(db, 'tasks'), orderByChild('activityDate'), equalTo(selectedDate));
 
   const chartRef = useRef<any>(null);
 
@@ -128,6 +185,8 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
       });
     });
 
+    get(dbQuery).then((snapshot) => { if (!cancelled && !snapshot.exists()) setLoading(false); }).catch(() => { if (!cancelled) setLoading(false); });
+
     return () => {
       cancelled = true;
       unsubscribeAdd();
@@ -135,19 +194,42 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
     };
   }, [selectedDate]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setTasksData([]);
+    get(tasksQuery).then((snapshot) => {
+      if (cancelled) return;
+      const items: TaskItem[] = [];
+      snapshot.forEach((child) => { items.push(child.val()); });
+      const taskTypeTarget = TASK_TYPE_MAP[filterKey];
+      const filtered = items.filter(t => {
+        if (t.taskType === taskTypeTarget) return true;
+        const name = (t.activityName || '').toLowerCase();
+        return FILTER_MAP[filterKey](name);
+      });
+      console.log(`[dash-tipo] date=${selectedDate} key=${filterKey} target=${taskTypeTarget} raw=${items.length} taskTypes=${[...new Set(items.map(t => t.taskType))].join(',')} filtered=${filtered.length}`);
+      setTasksData(filtered);
+    });
+    return () => { cancelled = true; };
+  }, [selectedDate, filterKey]);
+
   const filteredTasks = useMemo(() => {
     return tasks.filter(t => filterFn(t.activity?.activityName?.toLowerCase() || ''));
   }, [tasks, filterFn]);
 
-  const cardStat = useMemo(() => {
-    let total = 0, active = 0, finished = 0;
-    for (const t of filteredTasks) {
-      total++;
-      if (t.activity?.activityState === true) active++;
-      else finished++;
+  const taskStats = useMemo(() => {
+    const total = tasksData.length;
+    const uniqueProducts = new Set(tasksData.map(t => t.loadProduct).filter(Boolean)).size;
+    const uniqueAddresses = new Set(tasksData.map(t => t.loadAddress).filter(Boolean)).size;
+    const totalQuant = tasksData.reduce((acc, t) => acc + (parseInt(t.loadQuant || '0') || 0), 0);
+    switch (filterKey) {
+      case 'quarentena': return [total, uniqueProducts, totalQuant];
+      case 'picking':    return [total, uniqueAddresses, totalQuant];
+      case 'endereco':   return [total, uniqueAddresses, uniqueProducts];
+      case 'aereo':      return [total, uniqueAddresses, '—'];
+      default:           return [total, 0, 0];
     }
-    return { total, active, finished };
-  }, [filteredTasks]);
+  }, [tasksData, filterKey]);
 
   const chartData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -190,16 +272,30 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
   }, [filteredTasks]);
 
   function exportDashboard() {
-    const data = filteredTasks.map(t => ({
-      Código: t.activity.activityID,
-      Atividade: t.activity.activityName,
-      Usuário: t.activity.activtyUserName,
-      Centro: t.activity.activityLocalWork,
-      Início: `${fullDatePrint(t.activity.activityInitDate)} ${hourPrint(t.activity.activityInitDate)}`,
-      Término: t.activity.activityState ? '-' : `${fullDatePrint(t.activity.activityFinishDate)} ${hourPrint(t.activity.activityFinishDate)}`,
-      Duração: t.activity.activityState ? '-' : formatDuration(t.activity.activityFinishDate - t.activity.activityInitDate),
-      Situação: t.activity.activityState ? "Ativa" : "Finalizada",
-    }))
+    const activityMap = new Map(filteredTasks.map(a => [a._firebaseKey, a.activity]))
+    const data = tasksData.map(task => {
+      const validStr = task.loadValid || ''
+      const validFormatted = validStr.length === 8
+        ? `${validStr.slice(0, 2)}/${validStr.slice(2, 4)}/${validStr.slice(4, 8)}`
+        : validStr
+      const dateParts = (task.activityDate || '').split('-')
+      const dateFormatted = dateParts.length === 3
+        ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`
+        : task.activityDate
+      const activity = activityMap.get(task.activityRef || '')
+      return {
+        Centro: task.activityUserCenter ? `Centro ${task.activityUserCenter}` : '',
+        Tarefa: task.activityID || '',
+        Endereço: task.loadAddress || '',
+        Produto: task.loadProduct || '',
+        Quantidade: task.loadQuant || '',
+        Validade: validFormatted,
+        Operador: activity?.activtyUserName || '',
+        Data: dateFormatted,
+        Hora: task.createdAt ? hourPrint(task.createdAt) : '',
+        Atividade: task.activityName || '',
+      }
+    })
     const ws = XLSX.utils.json_to_sheet(data)
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, meta.title)
@@ -233,7 +329,7 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
           )}
           <button
             onClick={exportDashboard}
-            disabled={filteredTasks.length === 0}
+            disabled={tasksData.length === 0}
             className="px-4 py-2 rounded-lg bg-zinc-950 text-white hover:bg-zinc-800 cursor-pointer text-sm whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Exportar XLSX
@@ -247,14 +343,24 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
         </div>
       ) : (
         <div className="flex flex-col flex-1 min-h-0 gap-6">
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Card
-              title={meta.title}
-              description={meta.description}
-              total={cardStat.total}
-              active={cardStat.active}
-              finished={cardStat.finished}
-            />
+          <div className="flex gap-4">
+            {KPI_MAP[filterKey].map((kpi, i) => {
+              const Icon = kpi.icon
+              return (
+                <div
+                  key={kpi.label}
+                  className="flex items-center gap-4 flex-1 bg-card-bg rounded-[var(--radius)] p-5 shadow-sm border border-border min-w-0"
+                >
+                  <div className={`flex items-center justify-center w-12 h-12 rounded-xl shrink-0 ${kpi.bg}`}>
+                    <Icon className={`w-6 h-6 ${kpi.color}`} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-fg font-medium uppercase tracking-wider">{kpi.label}</p>
+                    <p className={`text-lg font-bold truncate ${kpi.color}`}>{taskStats[i]}</p>
+                  </div>
+                </div>
+              )
+            })}
           </div>
 
           <div className="flex-1 min-h-[250px] p-2 border border-zinc-900 rounded-lg">
@@ -291,55 +397,72 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
 
           <div className="flex flex-col gap-2">
             <h3 className="text-lg font-semibold text-zinc-800">
-              Detalhamento ({filteredTasks.length})
+              Detalhamento ({tasksData.length})
             </h3>
-            <div className="max-h-60 overflow-y-auto border border-zinc-900 rounded-lg">
+            <div className="max-h-72 overflow-y-auto border border-zinc-900 rounded-lg">
               <table className="w-full text-sm text-zinc-800">
                 <thead className="bg-zinc-200 sticky top-0">
                   <tr>
-                    <th className="text-left p-2 whitespace-nowrap">Código</th>
-                    <th className="text-left p-2 whitespace-nowrap">Atividade</th>
-                    <th className="text-left p-2 whitespace-nowrap">Usuário</th>
-                    <th className="text-left p-2 whitespace-nowrap">Centro</th>
-                    <th className="text-left p-2 whitespace-nowrap">Início</th>
-                    <th className="text-left p-2 whitespace-nowrap">Término</th>
-                    <th className="text-left p-2 whitespace-nowrap">Duração</th>
-                    <th className="text-left p-2 whitespace-nowrap">Situação</th>
+                    {DETAIL_COLUMNS[filterKey].map(col => (
+                      <th key={col.key} className="text-left p-2 whitespace-nowrap">{col.label}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTasks.map((t) => (
-                    <tr key={t._firebaseKey} className="border-t border-zinc-200 hover:bg-zinc-100">
-                      <td className="p-2 whitespace-nowrap">{t.activity.activityID}</td>
-                      <td className="p-2 whitespace-nowrap">{t.activity.activityName}</td>
-                      <td className="p-2 whitespace-nowrap">{t.activity.activtyUserName}</td>
-                      <td className="p-2 whitespace-nowrap">{t.activity.activityLocalWork}</td>
-                      <td className="p-2 whitespace-nowrap">
-                        {fullDatePrint(t.activity.activityInitDate)} {hourPrint(t.activity.activityInitDate)}
-                      </td>
-                      <td className="p-2 whitespace-nowrap">
-                        {t.activity.activityState
-                          ? '-'
-                          : `${fullDatePrint(t.activity.activityFinishDate)} ${hourPrint(t.activity.activityFinishDate)}`
-                        }
-                      </td>
-                      <td className="p-2 whitespace-nowrap">
-                        {t.activity.activityState
-                          ? '-'
-                          : formatDuration(t.activity.activityFinishDate - t.activity.activityInitDate)
-                        }
-                      </td>
-                      <td className="p-2 whitespace-nowrap">
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${t.activity.activityState ? 'bg-green-100 text-green-700' : 'bg-zinc-200 text-zinc-600'}`}>
-                          {t.activity.activityState ? "Ativa" : "Finalizada"}
-                        </span>
-                      </td>
+                  {tasksData.map((t, i) => (
+                    <tr key={i} className="border-t border-zinc-200 hover:bg-zinc-100">
+                      {DETAIL_COLUMNS[filterKey].map(col => (
+                        <td key={col.key} className="p-2 whitespace-nowrap">{(t as any)[col.key] || '-'}</td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
+          {filteredTasks.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h3 className="text-lg font-semibold text-zinc-800">Atividades ({filteredTasks.length})</h3>
+              <div className="max-h-60 overflow-y-auto border border-zinc-900 rounded-lg">
+                <table className="w-full text-sm text-zinc-800">
+                  <thead className="bg-zinc-200 sticky top-0">
+                    <tr>
+                      <th className="text-left p-2 whitespace-nowrap">Código</th>
+                      <th className="text-left p-2 whitespace-nowrap">Usuário</th>
+                      <th className="text-left p-2 whitespace-nowrap">Centro</th>
+                      <th className="text-left p-2 whitespace-nowrap">Início</th>
+                      <th className="text-left p-2 whitespace-nowrap">Término</th>
+                      <th className="text-left p-2 whitespace-nowrap">Duração</th>
+                      <th className="text-left p-2 whitespace-nowrap">Situação</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredTasks.map((t) => (
+                      <tr key={t._firebaseKey} className="border-t border-zinc-200 hover:bg-zinc-100">
+                        <td className="p-2 whitespace-nowrap">{t.activity.activityID}</td>
+                        <td className="p-2 whitespace-nowrap">{t.activity.activtyUserName}</td>
+                        <td className="p-2 whitespace-nowrap">{t.activity.activityLocalWork}</td>
+                        <td className="p-2 whitespace-nowrap">
+                          {fullDatePrint(t.activity.activityInitDate)} {hourPrint(t.activity.activityInitDate)}
+                        </td>
+                        <td className="p-2 whitespace-nowrap">
+                          {t.activity.activityState ? '-' : `${fullDatePrint(t.activity.activityFinishDate)} ${hourPrint(t.activity.activityFinishDate)}`}
+                        </td>
+                        <td className="p-2 whitespace-nowrap">
+                          {t.activity.activityState ? '-' : formatDuration(t.activity.activityFinishDate - t.activity.activityInitDate)}
+                        </td>
+                        <td className="p-2 whitespace-nowrap">
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${t.activity.activityState ? 'bg-green-100 text-green-700' : 'bg-zinc-200 text-zinc-600'}`}>
+                            {t.activity.activityState ? "Ativa" : "Finalizada"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

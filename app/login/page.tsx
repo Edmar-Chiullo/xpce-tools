@@ -46,7 +46,7 @@ export default function LoginPage() {
                         <input
                             id="registrationNumber"
                             type="text"
-                            placeholder="Ex: 1036960"
+                            placeholder="Ex: 1046860"
                             value={registrationNumber}
                             onChange={(e) => setRegistrationNumber(e.target.value)}
                             required
