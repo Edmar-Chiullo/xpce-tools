@@ -1,11 +1,11 @@
-
 'use client'
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 
 import z from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "react-toastify"
 
 import { SchemaValidarMaster } from "@/app/schemas/validar-master"
 import { DadosDaAtividade } from "@/app/types/TasksProps"
@@ -13,7 +13,7 @@ import { findOrCreateActivity, finishActivity, createTask } from "@/app/services
 
 export default function FormValidaMasterExpedicao({ atividade }: { atividade: DadosDaAtividade | any }) {
 
-  const  { reset, register, handleSubmit, setFocus, formState: { errors } } = useForm<z.infer<typeof SchemaValidarMaster>>({
+  const  { reset, register, handleSubmit, setFocus, setValue, formState: { errors } } = useForm<z.infer<typeof SchemaValidarMaster>>({
     resolver: zodResolver(SchemaValidarMaster),
     defaultValues: {
       activityID: atividade?.activityID,
@@ -22,20 +22,31 @@ export default function FormValidaMasterExpedicao({ atividade }: { atividade: Da
     },
   })
 
+  const validMasterRef = useRef<HTMLInputElement>(null)
+
+  const masterReg = register("validMaster", { required: true })
+  const { ref: masterRHFRef, ...masterProps } = masterReg
+
   useEffect(() => {
-    setFocus("validMaster")
+    validMasterRef.current?.focus()
   }, [])
 
   async function pushTaskActivity(values: any) {
     try {
-      const activityKey = await findOrCreateActivity({
-        activityUserCenter: atividade.activityUserCenter,
-        activityID: atividade.activityID,
-        activityName: atividade.activityName,
-        activtyUserName: atividade.activtyUserName,
-        activityUserID: atividade.activityUserID,
-        activityLocalWork: atividade.activityLocalWork,
-      })
+      let activityKey = atividade._firebaseKey
+
+      if (!activityKey) {
+        activityKey = await findOrCreateActivity({
+          activityUserCenter: atividade.activityUserCenter,
+          activityID: atividade.activityID,
+          activityName: atividade.activityName,
+          activtyUserName: atividade.activtyUserName,
+          activityUserID: atividade.activityUserID,
+          activityLocalWork: atividade.activityLocalWork,
+        })
+
+        localStorage.setItem('activity_valida-master-expedicao', activityKey)
+      }
 
       await createTask(activityKey, 'valida-master-expedicao', values)
 
@@ -58,6 +69,8 @@ export default function FormValidaMasterExpedicao({ atividade }: { atividade: Da
         activityID: act.activityID || '',
         activityName: act.activityName || '',
       })
+      localStorage.removeItem('activity_valida-master-expedicao')
+      sessionStorage.removeItem('active_activity_key_valida-master-expedicao')
     } catch (erro) {
       return {
         success: false,
@@ -72,11 +85,7 @@ export default function FormValidaMasterExpedicao({ atividade }: { atividade: Da
   }
 
   async function onSubmit(values: z.infer<typeof SchemaValidarMaster>) {
-    reset({
-      validMaster: '',
-      activityID: atividade?.activityID,
-      activityName: atividade?.activityName,
-    })
+    setValue("validMaster", "")
 
     const data = {
       activityUserCenter: atividade.activityUserCenter,
@@ -87,29 +96,37 @@ export default function FormValidaMasterExpedicao({ atividade }: { atividade: Da
     }
 
     const result = await pushTaskActivity(data)
-    setFocus("validMaster")
+    if (result.success) {
+      toast.success(result.message)
+    } else {
+      toast.error(result.message)
+    }
+    setTimeout(() => validMasterRef.current?.focus(), 150)
   }
 
   return (
-    <div className="absolute top-10 flex flex-col gap-2 w-full h-auto px-4">
-      <h1 className="md:text-xl lg:text-2xl">Valide master</h1>
-      <span className="self-end">{atividade.activityID}</span>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 w-full md:gap-4">
+    <div className="flex flex-col gap-4 w-full px-2 sm:px-4 py-2">
+      <h1 className="text-lg sm:text-xl lg:text-2xl text-zinc-950 font-bold ml-12 lg:ml-0">Validação Master</h1>
+      <span className="self-end text-sm text-zinc-600">{atividade.activityID}</span>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 w-full">
        <div>
-        <label htmlFor="">Master</label>
-        <input type="text" placeholder="Leia o master" {...register("validMaster", { required: true })} className="loadAddress w-full border rounded-sm p-2" />
+        <label className="text-sm text-zinc-700">Master</label>
+        <input type="text" placeholder="Leia o master"
+          {...masterProps}
+          ref={(e) => { masterRHFRef(e); validMasterRef.current = e }}
+          className="loadAddress w-full border rounded-md p-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-zinc-950" autoComplete="off"/>
         {errors.validMaster && <span className="text-red-500 text-sm">{errors.validMaster.message}</span>}
        </div>
 
-        <input type="hidden" {...register("activityID", { required: true })} name="activityID" defaultValue={atividade?.activityID ?? ""} />
-        <input type="hidden" {...register("activityName", { required: true })} name="activityName" defaultValue={atividade?.activityName ?? ""} />
+        <input type="hidden" {...register("activityID", { required: true })} />
+        <input type="hidden" {...register("activityName", { required: true })} />
 
-        <button type="submit" className="w-full h-10 bg-zinc-950 text-zinc-50 rounded-sm">
+        <button type="submit" className="w-full h-12 bg-zinc-950 text-zinc-50 rounded-md text-base font-medium hover:bg-zinc-800 active:bg-zinc-700 cursor-pointer">
           Confirmar
         </button>
       </form>
-      <button onClick={() => getActivity(atividade)} className="w-full h-10 bg-zinc-950 text-zinc-50 rounded-sm">
-        Finalizar
+      <button onClick={() => getActivity(atividade)} className="w-full h-12 bg-red-600 text-zinc-50 rounded-md text-base font-medium hover:bg-red-700 active:bg-red-800 cursor-pointer">
+        Finalizar Atividade
       </button>
     </div>
   )

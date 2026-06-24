@@ -7,6 +7,7 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url)
         const search = searchParams.get('search')?.toLowerCase() || ''
         const permission = searchParams.get('permission') || ''
+        const active = searchParams.get('active') || ''
         const page = parseInt(searchParams.get('page') || '1', 10)
         const limit = parseInt(searchParams.get('limit') || '20', 10)
 
@@ -23,8 +24,9 @@ export async function GET(req: Request) {
             const nameMatch = data.userName?.toLowerCase().includes(search)
             const regMatch = data.registrationNumber?.toLowerCase().includes(search)
             const permMatch = !permission || data.userPermission === permission
+            const activeMatch = !active || data.userActive === (active === 'true')
 
-            if ((!search || nameMatch || regMatch) && permMatch) {
+            if ((!search || nameMatch || regMatch) && permMatch && activeMatch) {
                 users.push({
                     id: child.key,
                     registrationNumber: data.registrationNumber || '',

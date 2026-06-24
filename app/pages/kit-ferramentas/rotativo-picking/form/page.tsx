@@ -1,17 +1,62 @@
-import FormRotativoPicking from "@/app/components/components-ui/forms-coletor/form-rotativo-picking";
+'use client'
 
-export default function RotativoPicking() {
-    
-    return (
-        <div className="relative flex flex-col gap-4 w-full h-full text-zinc-400">  
-            <div className="flex flex-col gap-2 w-full h-full mt-6">
-                <FormRotativoPicking atividade={{
-                    activityUserCenter: '',
-                    activityID: '',
-                    activityUserID: '',
-                    activityName: '',
-                }}/>
+import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
+import { ref, get, child } from "firebase/database"
+import { db } from "@/app/firebasekey/keyapi"
+import { generateActivityId } from "@/app/utils/ger-ids"
+import FormRotativoPicking from "@/app/components/components-ui/forms-coletor/form-rotativo-picking"
+
+export default function RotativoPickingForm() {
+    const { data: session, status } = useSession()
+    const [activityData, setActivityData] = useState<any>(null)
+    const [ready, setReady] = useState(false)
+
+    useEffect(() => {
+        async function load() {
+            const storedKey = sessionStorage.getItem('active_activity_key_rotativo-picking')
+            if (storedKey) {
+                try {
+                    const snap = await get(child(ref(db), `activities/${storedKey}`))
+                    if (snap.exists()) {
+                        const data = snap.val()
+                        setActivityData({ ...data, _firebaseKey: storedKey })
+                        setReady(true)
+                        return
+                    }
+                } catch {}
+            }
+            setActivityData({
+                activityUserCenter: session?.user?.center || '',
+                activityUserID: session?.user?.id || '',
+                activtyUserName: session?.user?.name || '',
+                activityName: 'Rotativo De Picking',
+                activityID: generateActivityId('Rotativo De Picking'),
+            })
+            setReady(true)
+        }
+        load()
+    }, [session])
+
+    if (status === "loading") {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <p className="text-zinc-500">Carregando sessão...</p>
             </div>
+        )
+    }
+
+    if (!ready) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <p className="text-zinc-500">Preparando...</p>
+            </div>
+        )
+    }
+
+    return (
+        <div className="flex flex-col w-full h-full">
+            <FormRotativoPicking atividade={activityData} />
         </div>
     )
 }

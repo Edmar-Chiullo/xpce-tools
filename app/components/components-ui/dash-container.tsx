@@ -207,7 +207,7 @@ function ContainerDash() {
                 <h3 className="text-sm font-semibold text-card-fg mb-3">
                   Tarefas do dia ({tasks.length})
                 </h3>
-                <div className="max-h-60 overflow-y-auto">
+                <div className="max-h-60 overflow-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-muted sticky top-0">
                       <tr>

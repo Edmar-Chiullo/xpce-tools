@@ -1,4 +1,4 @@
-import Navbar from "../components/components-ui/navbar";
+import Sidebar from "../components/components-ui/sidebar";
 
 export default function RootLayout({
   children,
@@ -6,11 +6,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex w-full h-screen p-3 gap-3 bg-surface rounded-[var(--radius)]">
-      <aside className="flex flex-col w-64 min-h-full bg-sidebar-bg rounded-[var(--radius)] p-4 shrink-0">
-        <Navbar />
-      </aside>
-      <main className="flex-1 min-h-full overflow-auto">
+    <div className="flex w-full min-h-dvh p-0 lg:p-3 lg:gap-3 bg-surface rounded-[var(--radius)]">
+      <Sidebar />
+      <main className="flex-1 min-h-dvh lg:min-h-full overflow-auto p-3 lg:p-0 lg:ml-0">
         {children}
       </main>
     </div>

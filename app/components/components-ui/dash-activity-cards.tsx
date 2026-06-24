@@ -31,7 +31,7 @@ export default function DashActivityCards({ tasks, selectedDate }: DashActivityC
   }
 
   return (
-    <div className="flex gap-4">
+    <div className="grid grid-cols-2 gap-3 lg:flex lg:gap-4">
       {CARDS_CONFIG.map((card) => {
         const Icon = card.icon
         const count = countByType(card.key)

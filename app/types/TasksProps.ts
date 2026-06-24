@@ -30,6 +30,7 @@ export interface DadosDaAtividade {
     activtyUserName?: string
     activityUserCenter?: string
     activityFinishDate?: string
+    _firebaseKey?: string
 }
 
 export interface TaskItem {

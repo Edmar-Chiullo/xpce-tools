@@ -1,17 +1,18 @@
 'use client'
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 
 import z from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "react-toastify"
 
 import { DadosDaAtividade } from "@/app/types/TasksProps";
 import { SchemaQuarentenaFracionada } from "@/app/schemas/quarentena-fracionada"
 import { findOrCreateActivity, finishActivity, createTask } from "@/app/services/activityService"
 
 export default function FormQuarentenaFracionada({ atividade }: { atividade: DadosDaAtividade | any }) {
-  const  { reset, register, handleSubmit, setFocus, formState: { errors } } = useForm<z.infer<typeof SchemaQuarentenaFracionada>>({
+  const  { reset, register, handleSubmit, setFocus, setValue, formState: { errors } } = useForm<z.infer<typeof SchemaQuarentenaFracionada>>({
     resolver: zodResolver(SchemaQuarentenaFracionada),
     defaultValues: {
       activityID: atividade?.activityID,
@@ -22,20 +23,48 @@ export default function FormQuarentenaFracionada({ atividade }: { atividade: Dad
     },
   })
 
+  const loadProductRef = useRef<HTMLInputElement>(null)
+  const loadQuantRef = useRef<HTMLInputElement>(null)
+  const loadValidRef = useRef<HTMLInputElement>(null)
+
+  const prodReg = register("loadProduct", { required: true })
+  const { ref: prodRHFRef, ...prodProps } = prodReg
+
+  const quantReg = register("loadQuant", { required: true })
+  const { ref: quantRHFRef, ...quantProps } = quantReg
+
+  const validReg = register("loadValid", { required: true })
+  const { ref: validRHFRef, ...validProps } = validReg
+
   useEffect(() => {
-    setFocus("loadProduct")
+    loadProductRef.current?.focus()
   }, [])
+
+  function onKeyDown(e: React.KeyboardEvent, nextRef?: React.RefObject<HTMLInputElement | null>) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      if (nextRef?.current) {
+        nextRef.current.focus()
+      }
+    }
+  }
 
   async function pushTaskActivity(values: any) {
     try {
-      const activityKey = await findOrCreateActivity({
-        activityUserCenter: atividade.activityUserCenter,
-        activityID: atividade.activityID,
-        activityName: atividade.activityName,
-        activtyUserName: atividade.activtyUserName,
-        activityUserID: atividade.activityUserID,
-        activityLocalWork: atividade.activityLocalWork,
-      })
+      let activityKey = atividade._firebaseKey
+
+      if (!activityKey) {
+        activityKey = await findOrCreateActivity({
+          activityUserCenter: atividade.activityUserCenter,
+          activityID: atividade.activityID,
+          activityName: atividade.activityName,
+          activtyUserName: atividade.activtyUserName,
+          activityUserID: atividade.activityUserID,
+          activityLocalWork: atividade.activityLocalWork,
+        })
+
+        localStorage.setItem(`activity_quarentena-fracionada`, activityKey)
+      }
 
       await createTask(activityKey, 'quarentena-fracionada', values)
 
@@ -58,6 +87,8 @@ export default function FormQuarentenaFracionada({ atividade }: { atividade: Dad
         activityID: act.activityID || '',
         activityName: act.activityName || '',
       })
+      localStorage.removeItem('activity_quarentena-fracionada')
+      sessionStorage.removeItem('active_activity_key_quarentena-fracionada')
     } catch (erro) {
       return {
         success: false,
@@ -72,13 +103,9 @@ export default function FormQuarentenaFracionada({ atividade }: { atividade: Dad
   }
 
   async function onSubmit(values: z.infer<typeof SchemaQuarentenaFracionada>) {
-    reset({
-      loadProduct: '',
-      loadQuant:  '',
-      loadValid: '',
-      activityID: atividade?.activityID,
-      activityName: atividade?.activityName,
-    })
+    setValue("loadProduct", "")
+    setValue("loadQuant", "")
+    setValue("loadValid", "")
 
     const data = {
       activityUserCenter: atividade.activityUserCenter,
@@ -91,41 +118,57 @@ export default function FormQuarentenaFracionada({ atividade }: { atividade: Dad
     }
 
     const result = await pushTaskActivity(data)
-    setFocus("loadProduct")
+    if (result.success) {
+      toast.success(result.message)
+    } else {
+      toast.error(result.message)
+    }
+    setTimeout(() => loadProductRef.current?.focus(), 150)
   }
 
   return (
-    <div className="absolute top-10 flex flex-col gap-2 w-full h-auto px-4">
-      <h1 className="md:text-xl lg:text-2xl">Quarentena Fracionada</h1>
-      <span className="self-end">{atividade.activityID}</span>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 w-full md:gap-4">
+    <div className="flex flex-col gap-4 w-full px-2 sm:px-4 py-2">
+      <h1 className="text-lg sm:text-xl lg:text-2xl text-zinc-950 font-bold ml-12 lg:ml-0">Quarentena Fracionada</h1>
+      <span className="self-end text-sm text-zinc-600">{atividade.activityID}</span>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 w-full">
           <div>
-            <label htmlFor="">Produto</label>
-            <input type="text" placeholder="Leia o produto" {...register("loadProduct", { required: true })} className="loadProduct w-full border rounded-sm p-2"/>
+            <label className="text-sm text-zinc-700">Produto</label>
+            <input type="text" placeholder="Leia o produto"
+              {...prodProps}
+              ref={(e) => { prodRHFRef(e); loadProductRef.current = e }}
+              onKeyDown={(e) => onKeyDown(e, loadQuantRef)}
+              className="loadProduct w-full border rounded-md p-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-zinc-950" autoComplete="off"/>
             {errors.loadProduct && <span className="text-red-500 text-sm">{errors.loadProduct.message}</span>}
           </div>
 
           <div>
-            <label htmlFor="">Quantidade</label>
-            <input type="text" placeholder="Informe a quantidade" {...register("loadQuant", { required: true })} className="w-full border rounded-sm p-2" />
+            <label className="text-sm text-zinc-700">Quantidade</label>
+            <input type="text" placeholder="Informe a quantidade"
+              {...quantProps}
+              ref={(e) => { quantRHFRef(e); loadQuantRef.current = e }}
+              onKeyDown={(e) => onKeyDown(e, loadValidRef)}
+              className="w-full border rounded-md p-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-zinc-950" autoComplete="off"/>
             {errors.loadQuant && <span className="text-red-500 text-sm">{errors.loadQuant.message}</span>}
           </div>
 
           <div>
-            <label htmlFor="">Validade</label>
-            <input type="text" placeholder="Informe a validade" {...register("loadValid", { required: true })} className="loadValid w-full border rounded-sm p-2" />
+            <label className="text-sm text-zinc-700">Validade</label>
+            <input type="text" placeholder="Informe a validade"
+              {...validProps}
+              ref={(e) => { validRHFRef(e); loadValidRef.current = e }}
+              className="loadValid w-full border rounded-md p-3 text-base bg-white focus:outline-none focus:ring-2 focus:ring-zinc-950" autoComplete="off"/>
             {errors.loadValid && <span className="text-red-500 text-sm">{errors.loadValid.message}</span>}
           </div>
 
           <input type="hidden" {...register("activityID")} />
           <input type="hidden" {...register("activityName")} />
 
-          <button type="submit" className="w-full h-10 bg-zinc-950 text-zinc-50 rounded-sm">
+          <button type="submit" className="w-full h-12 bg-zinc-950 text-zinc-50 rounded-md text-base font-medium hover:bg-zinc-800 active:bg-zinc-700 cursor-pointer">
             Confirmar
           </button>
         </form>
-        <button onClick={() => getActivity(atividade)} className="w-full h-10 bg-zinc-950 text-zinc-50 rounded-sm">
-          Finalizar
+        <button onClick={() => getActivity(atividade)} className="w-full h-12 bg-red-600 text-zinc-50 rounded-md text-base font-medium hover:bg-red-700 active:bg-red-800 cursor-pointer">
+          Finalizar Atividade
         </button>
     </div>
   );

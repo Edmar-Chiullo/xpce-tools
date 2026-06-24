@@ -41,6 +41,7 @@ export default function UsersPage() {
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
     const [permissionFilter, setPermissionFilter] = useState("")
+    const [activeFilter, setActiveFilter] = useState("true")
     const [currentPage, setCurrentPage] = useState(1)
     const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
@@ -55,6 +56,7 @@ export default function UsersPage() {
             const params = new URLSearchParams()
             if (search) params.set('search', search)
             if (permissionFilter) params.set('permission', permissionFilter)
+            if (activeFilter) params.set('active', activeFilter)
             params.set('limit', '999')
 
             const res = await fetch(`/api/users?${params}`)
@@ -66,7 +68,7 @@ export default function UsersPage() {
             setStatusMsg({ type: 'error', text: 'Erro ao carregar usuários.' })
         }
         setLoading(false)
-    }, [search, permissionFilter])
+    }, [search, permissionFilter, activeFilter])
 
     useEffect(() => {
         fetchUsers()
@@ -84,7 +86,7 @@ export default function UsersPage() {
 
     useEffect(() => {
         setCurrentPage(1)
-    }, [search, permissionFilter])
+    }, [search, permissionFilter, activeFilter])
 
     function showMsg(type: 'success' | 'error', text: string) {
         setStatusMsg({ type, text })
@@ -174,6 +176,16 @@ export default function UsersPage() {
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                 </select>
+
+                <select
+                    value={activeFilter}
+                    onChange={e => setActiveFilter(e.target.value)}
+                    className="border border-zinc-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-zinc-950"
+                >
+                    <option value="true">Ativos</option>
+                    <option value="">Todos</option>
+                    <option value="false">Inativos</option>
+                </select>
             </div>
 
             {statusMsg && (
@@ -182,7 +194,7 @@ export default function UsersPage() {
                 </div>
             )}
 
-            <div className="border border-zinc-300 rounded-lg overflow-hidden">
+            <div className="border border-zinc-300 rounded-lg overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead className="bg-zinc-200">
                         <tr>

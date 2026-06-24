@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
     const router = useRouter()
+    const { update } = useSession()
     const [registrationNumber, setRegistrationNumber] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
@@ -22,13 +23,13 @@ export default function LoginPage() {
             redirect: false,
         })
 
-        setLoading(false)
-
         if (result?.error) {
             setError("Matrícula ou senha inválidos.")
+            setLoading(false)
             return
         }
 
+        await update()
         router.push("/pages")
     }
 

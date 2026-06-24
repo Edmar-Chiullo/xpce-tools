@@ -399,7 +399,7 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
             <h3 className="text-lg font-semibold text-zinc-800">
               Detalhamento ({tasksData.length})
             </h3>
-            <div className="max-h-72 overflow-y-auto border border-zinc-900 rounded-lg">
+            <div className="max-h-72 overflow-auto border border-zinc-900 rounded-lg">
               <table className="w-full text-sm text-zinc-800">
                 <thead className="bg-zinc-200 sticky top-0">
                   <tr>
@@ -423,7 +423,7 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
           {filteredTasks.length > 0 && (
             <div className="flex flex-col gap-2">
               <h3 className="text-lg font-semibold text-zinc-800">Atividades ({filteredTasks.length})</h3>
-              <div className="max-h-60 overflow-y-auto border border-zinc-900 rounded-lg">
+              <div className="max-h-60 overflow-auto border border-zinc-900 rounded-lg">
                 <table className="w-full text-sm text-zinc-800">
                   <thead className="bg-zinc-200 sticky top-0">
                     <tr>
