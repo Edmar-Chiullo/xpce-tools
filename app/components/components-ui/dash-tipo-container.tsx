@@ -30,7 +30,7 @@ const FILTER_MAP: Record<string, (name: string) => boolean> = {
   quarentena: (name) => name.includes('quarentena'),
   picking: (name) => name.includes('picking') || name.includes('rotativo'),
   endereco: (name) => name.includes('endereço') || name.includes('produto'),
-  aereo: (name) => name.includes('aéreo'),
+  aereo: (name) => name.normalize('NFD').replace(/\p{Diacritic}/gu, '').includes('aereo'),
 };
 
 const TITLE_MAP: Record<string, { title: string; description: string }> = {
@@ -129,7 +129,6 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
   const [loading, setLoading] = useState(true);
 
   const dbQuery = query(ref(db, 'activities'), orderByChild('activityDate'), equalTo(selectedDate));
-  const tasksQuery = query(ref(db, 'tasks'), orderByChild('activityDate'), equalTo(selectedDate));
 
   const chartRef = useRef<any>(null);
 
@@ -194,28 +193,38 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
     };
   }, [selectedDate]);
 
-  useEffect(() => {
-    let cancelled = false;
-    setTasksData([]);
-    get(tasksQuery).then((snapshot) => {
-      if (cancelled) return;
-      const items: TaskItem[] = [];
-      snapshot.forEach((child) => { items.push(child.val()); });
-      const taskTypeTarget = TASK_TYPE_MAP[filterKey];
-      const filtered = items.filter(t => {
-        if (t.taskType === taskTypeTarget) return true;
-        const name = (t.activityName || '').toLowerCase();
-        return FILTER_MAP[filterKey](name);
-      });
-      console.log(`[dash-tipo] date=${selectedDate} key=${filterKey} target=${taskTypeTarget} raw=${items.length} taskTypes=${[...new Set(items.map(t => t.taskType))].join(',')} filtered=${filtered.length}`);
-      setTasksData(filtered);
-    });
-    return () => { cancelled = true; };
-  }, [selectedDate, filterKey]);
-
   const filteredTasks = useMemo(() => {
     return tasks.filter(t => filterFn(t.activity?.activityName?.toLowerCase() || ''));
   }, [tasks, filterFn]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setTasksData([]);
+
+    const activityKeys = filteredTasks.map(t => t._firebaseKey).filter((k): k is string => !!k)
+    if (activityKeys.length === 0) return
+
+    Promise.all(activityKeys.map(key =>
+        get(query(ref(db, 'tasks'), orderByChild('activityRef'), equalTo(key)))
+    )).then(snapshots => {
+        if (cancelled) return;
+        const items: TaskItem[] = []
+        snapshots.forEach(snap => {
+            snap.forEach(child => {
+                items.push(child.val());
+            });
+        });
+        const taskTypeTarget = TASK_TYPE_MAP[filterKey];
+        const filtered = items.filter(t => {
+            if (t.taskType === taskTypeTarget) return true;
+            const name = (t.activityName || '').toLowerCase();
+            return FILTER_MAP[filterKey](name);
+        });
+        setTasksData(filtered);
+    });
+
+    return () => { cancelled = true; };
+  }, [selectedDate, filterKey, filteredTasks]);
 
   const taskStats = useMemo(() => {
     const total = tasksData.length;
@@ -271,6 +280,16 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
       .sort((a, b) => b.count - a.count);
   }, [filteredTasks]);
 
+  function formatDateSafe(dateVal: unknown): string {
+    if (!dateVal) return ''
+    const str = String(dateVal)
+    const parts = str.split('-')
+    if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`
+    }
+    return str
+  }
+
   function exportDashboard() {
     const activityMap = new Map(filteredTasks.map(a => [a._firebaseKey, a.activity]))
     const data = tasksData.map(task => {
@@ -278,10 +297,6 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
       const validFormatted = validStr.length === 8
         ? `${validStr.slice(0, 2)}/${validStr.slice(2, 4)}/${validStr.slice(4, 8)}`
         : validStr
-      const dateParts = (task.activityDate || '').split('-')
-      const dateFormatted = dateParts.length === 3
-        ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`
-        : task.activityDate
       const activity = activityMap.get(task.activityRef || '')
       return {
         Centro: task.activityUserCenter ? `Centro ${task.activityUserCenter}` : '',
@@ -291,7 +306,7 @@ function DashTipoContainer({ filterKey }: DashTipoProps) {
         Quantidade: task.loadQuant || '',
         Validade: validFormatted,
         Operador: activity?.activtyUserName || '',
-        Data: dateFormatted,
+        Data: formatDateSafe(task.activityDate),
         Hora: task.createdAt ? hourPrint(task.createdAt) : '',
         Atividade: task.activityName || '',
       }

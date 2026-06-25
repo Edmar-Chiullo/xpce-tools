@@ -11,7 +11,7 @@ import { SchemaValidarMaster } from "@/app/schemas/validar-master"
 import { DadosDaAtividade } from "@/app/types/TasksProps"
 import { findOrCreateActivity, finishActivity, createTask } from "@/app/services/activityService"
 
-export default function FormValidaMasterExpedicao({ atividade }: { atividade: DadosDaAtividade | any }) {
+export default function FormValidaMasterExpedicao({ atividade, originHref }: { atividade: DadosDaAtividade | any, originHref?: string }) {
 
   const  { reset, register, handleSubmit, setFocus, setValue, formState: { errors } } = useForm<z.infer<typeof SchemaValidarMaster>>({
     resolver: zodResolver(SchemaValidarMaster),
@@ -31,6 +31,13 @@ export default function FormValidaMasterExpedicao({ atividade }: { atividade: Da
     validMasterRef.current?.focus()
   }, [])
 
+  useEffect(() => {
+    if (atividade?.activityID) {
+      setValue("activityID", atividade.activityID)
+      setValue("activityName", atividade.activityName)
+    }
+  }, [atividade?.activityID, atividade?.activityName])
+
   async function pushTaskActivity(values: any) {
     try {
       let activityKey = atividade._firebaseKey
@@ -45,7 +52,6 @@ export default function FormValidaMasterExpedicao({ atividade }: { atividade: Da
           activityLocalWork: atividade.activityLocalWork,
         })
 
-        localStorage.setItem('activity_valida-master-expedicao', activityKey)
       }
 
       await createTask(activityKey, 'valida-master-expedicao', values)
@@ -68,20 +74,19 @@ export default function FormValidaMasterExpedicao({ atividade }: { atividade: Da
         activityUserCenter: act.activityUserCenter || '',
         activityID: act.activityID || '',
         activityName: act.activityName || '',
+        activityUserID: act.activityUserID || '',
+        _firebaseKey: act._firebaseKey,
       })
-      localStorage.removeItem('activity_valida-master-expedicao')
       sessionStorage.removeItem('active_activity_key_valida-master-expedicao')
+      toast.success('Atividade finalizada com sucesso!')
     } catch (erro) {
-      return {
-        success: false,
-        message: 'Falha ao finalizar a atividade'
-      };
+      toast.error('Falha ao finalizar a atividade')
     }
   }
 
-  function getActivity(act: DadosDaAtividade) {
-    finishCurrentActivity(act)
-    window.location.reload()
+  async function getActivity(act: DadosDaAtividade) {
+    await finishCurrentActivity(act)
+    window.location.href = originHref || '/pages/kit-ferramentas'
   }
 
   async function onSubmit(values: z.infer<typeof SchemaValidarMaster>) {
@@ -92,13 +97,11 @@ export default function FormValidaMasterExpedicao({ atividade }: { atividade: Da
       activityID: values.activityID,
       activityName: values.activityName,
       validMaster: values.validMaster,
-      activityDate: Date.now()
+      activityDate: new Date().toISOString().split('T')[0]
     }
 
     const result = await pushTaskActivity(data)
-    if (result.success) {
-      toast.success(result.message)
-    } else {
+    if (!result.success) {
       toast.error(result.message)
     }
     setTimeout(() => validMasterRef.current?.focus(), 150)

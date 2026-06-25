@@ -28,7 +28,7 @@ export default function RotativoPickingForm() {
             }
             setActivityData({
                 activityUserCenter: session?.user?.center || '',
-                activityUserID: session?.user?.id || '',
+                activityUserID: session?.user?.registrationNumber || '',
                 activtyUserName: session?.user?.name || '',
                 activityName: 'Rotativo De Picking',
                 activityID: generateActivityId('Rotativo De Picking'),
@@ -56,7 +56,7 @@ export default function RotativoPickingForm() {
 
     return (
         <div className="flex flex-col w-full h-full">
-            <FormRotativoPicking atividade={activityData} />
+            <FormRotativoPicking atividade={activityData} originHref="/pages/kit-ferramentas/rotativo-picking" />
         </div>
     )
 }

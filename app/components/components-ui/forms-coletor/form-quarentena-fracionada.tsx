@@ -11,7 +11,7 @@ import { DadosDaAtividade } from "@/app/types/TasksProps";
 import { SchemaQuarentenaFracionada } from "@/app/schemas/quarentena-fracionada"
 import { findOrCreateActivity, finishActivity, createTask } from "@/app/services/activityService"
 
-export default function FormQuarentenaFracionada({ atividade }: { atividade: DadosDaAtividade | any }) {
+export default function FormQuarentenaFracionada({ atividade, originHref }: { atividade: DadosDaAtividade | any, originHref?: string }) {
   const  { reset, register, handleSubmit, setFocus, setValue, formState: { errors } } = useForm<z.infer<typeof SchemaQuarentenaFracionada>>({
     resolver: zodResolver(SchemaQuarentenaFracionada),
     defaultValues: {
@@ -40,6 +40,13 @@ export default function FormQuarentenaFracionada({ atividade }: { atividade: Dad
     loadProductRef.current?.focus()
   }, [])
 
+  useEffect(() => {
+    if (atividade?.activityID) {
+      setValue("activityID", atividade.activityID)
+      setValue("activityName", atividade.activityName)
+    }
+  }, [atividade?.activityID, atividade?.activityName])
+
   function onKeyDown(e: React.KeyboardEvent, nextRef?: React.RefObject<HTMLInputElement | null>) {
     if (e.key === 'Enter') {
       e.preventDefault()
@@ -63,7 +70,6 @@ export default function FormQuarentenaFracionada({ atividade }: { atividade: Dad
           activityLocalWork: atividade.activityLocalWork,
         })
 
-        localStorage.setItem(`activity_quarentena-fracionada`, activityKey)
       }
 
       await createTask(activityKey, 'quarentena-fracionada', values)
@@ -86,20 +92,19 @@ export default function FormQuarentenaFracionada({ atividade }: { atividade: Dad
         activityUserCenter: act.activityUserCenter || '',
         activityID: act.activityID || '',
         activityName: act.activityName || '',
+        activityUserID: act.activityUserID || '',
+        _firebaseKey: act._firebaseKey,
       })
-      localStorage.removeItem('activity_quarentena-fracionada')
       sessionStorage.removeItem('active_activity_key_quarentena-fracionada')
+      toast.success('Atividade finalizada com sucesso!')
     } catch (erro) {
-      return {
-        success: false,
-        message: 'Falha ao finalizar a atividade'
-      };
+      toast.error('Falha ao finalizar a atividade')
     }
   }
 
-  function getActivity(act: DadosDaAtividade) {
-    finishCurrentActivity(act)
-    window.location.reload()
+  async function getActivity(act: DadosDaAtividade) {
+    await finishCurrentActivity(act)
+    window.location.href = originHref || '/pages/kit-ferramentas'
   }
 
   async function onSubmit(values: z.infer<typeof SchemaQuarentenaFracionada>) {
@@ -114,13 +119,11 @@ export default function FormQuarentenaFracionada({ atividade }: { atividade: Dad
       loadProduct: values.loadProduct,
       loadQuant: values.loadQuant,
       loadValid: values.loadValid,
-      activityDate: Date.now()
+      activityDate: new Date().toISOString().split('T')[0]
     }
 
     const result = await pushTaskActivity(data)
-    if (result.success) {
-      toast.success(result.message)
-    } else {
+    if (!result.success) {
       toast.error(result.message)
     }
     setTimeout(() => loadProductRef.current?.focus(), 150)

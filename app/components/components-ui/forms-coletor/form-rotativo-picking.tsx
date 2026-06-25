@@ -11,7 +11,7 @@ import { DadosDaAtividade } from "@/app/types/TasksProps";
 import { SchemaRotativoPicking } from "@/app/schemas/rotativo-picking"
 import { findOrCreateActivity, finishActivity, createTask } from "@/app/services/activityService"
 
-export default function FormRotativoPicking({ atividade }: { atividade: DadosDaAtividade | any }) {
+export default function FormRotativoPicking({ atividade, originHref }: { atividade: DadosDaAtividade | any, originHref?: string }) {
 
   const  { reset, register, handleSubmit, setFocus, setValue, formState: { errors } } = useForm<z.infer<typeof SchemaRotativoPicking>>({
     resolver: zodResolver(SchemaRotativoPicking),
@@ -46,6 +46,13 @@ export default function FormRotativoPicking({ atividade }: { atividade: DadosDaA
     loadAddressRef.current?.focus()
   }, [])
 
+  useEffect(() => {
+    if (atividade?.activityID) {
+      setValue("activityID", atividade.activityID)
+      setValue("activityName", atividade.activityName)
+    }
+  }, [atividade?.activityID, atividade?.activityName])
+
   function onKeyDown(e: React.KeyboardEvent, nextRef?: React.RefObject<HTMLInputElement | null>) {
     if (e.key === 'Enter') {
       e.preventDefault()
@@ -68,8 +75,6 @@ export default function FormRotativoPicking({ atividade }: { atividade: DadosDaA
           activityUserID: atividade.activityUserID,
           activityLocalWork: atividade.activityLocalWork,
         })
-
-        localStorage.setItem('activity_rotativo-picking', activityKey)
       }
 
       await createTask(activityKey, 'rotativo-picking', values)
@@ -85,27 +90,26 @@ export default function FormRotativoPicking({ atividade }: { atividade: DadosDaA
       };
     }
   }
-
+//
   async function finishCurrentActivity(act: DadosDaAtividade) {
     try {
       await finishActivity({
         activityUserCenter: act.activityUserCenter || '',
         activityID: act.activityID || '',
         activityName: act.activityName || '',
+        activityUserID: act.activityUserID || '',
+        _firebaseKey: act._firebaseKey,
       })
-      localStorage.removeItem('activity_rotativo-picking')
       sessionStorage.removeItem('active_activity_key_rotativo-picking')
+      toast.success('Atividade finalizada com sucesso!')
     } catch (erro) {
-      return {
-        success: false,
-        message: 'Falha ao finalizar a atividade'
-      };
+      toast.error('Falha ao finalizar a atividade')
     }
   }
 
-  function getActivity(act: DadosDaAtividade) {
-    finishCurrentActivity(act)
-    window.location.reload()
+  async function getActivity(act: DadosDaAtividade) {
+    await finishCurrentActivity(act)
+    window.location.href = originHref || '/pages/kit-ferramentas'
   }
 
   async function onSubmit(values: z.infer<typeof SchemaRotativoPicking>) {
@@ -122,13 +126,11 @@ export default function FormRotativoPicking({ atividade }: { atividade: DadosDaA
       loadProduct: values.loadProduct,
       loadQuant: values.loadQuant,
       loadValid: values.loadValid,
-      activityDate: Date.now()
+      activityDate: new Date().toISOString().split('T')[0]
     }
 
     const result = await pushTaskActivity(data)
-    if (result.success) {
-      toast.success(result.message)
-    } else {
+    if (!result.success) {
       toast.error(result.message)
     }
     setTimeout(() => loadAddressRef.current?.focus(), 150)

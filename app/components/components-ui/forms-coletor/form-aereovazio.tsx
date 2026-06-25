@@ -11,7 +11,7 @@ import { SchemaAereoVazio } from "@/app/schemas/aereovazio"
 import { DadosDaAtividade } from "@/app/types/TasksProps"
 import { findOrCreateActivity, finishActivity, createTask } from "@/app/services/activityService"
 
-export default function EnderecoVazio({ activity }: { activity: DadosDaAtividade | any }) {
+export default function EnderecoVazio({ activity, originHref }: { activity: DadosDaAtividade | any, originHref?: string }) {
 
   const  { reset, register, handleSubmit, setFocus, setValue, formState: { errors } } = useForm<z.infer<typeof SchemaAereoVazio>>({
     resolver: zodResolver(SchemaAereoVazio),
@@ -30,6 +30,13 @@ export default function EnderecoVazio({ activity }: { activity: DadosDaAtividade
     loadAddressRef.current?.focus()
   }, [])
 
+  useEffect(() => {
+    if (activity?.activityID) {
+      setValue("activityID", activity.activityID)
+      setValue("activityName", activity.activityName)
+    }
+  }, [activity?.activityID, activity?.activityName])
+
   async function pushTaskActivity(values: any) {
     try {
       let activityKey = activity._firebaseKey
@@ -44,7 +51,6 @@ export default function EnderecoVazio({ activity }: { activity: DadosDaAtividade
           activityLocalWork: activity.activityLocalWork,
         })
 
-        localStorage.setItem('activity_aereo-vazio', activityKey)
       }
 
       await createTask(activityKey, 'aereo-vazio', values)
@@ -67,20 +73,19 @@ export default function EnderecoVazio({ activity }: { activity: DadosDaAtividade
         activityUserCenter: act.activityUserCenter || '',
         activityID: act.activityID || '',
         activityName: act.activityName || '',
+        activityUserID: act.activityUserID || '',
+        _firebaseKey: act._firebaseKey,
       })
-      localStorage.removeItem('activity_aereo-vazio')
       sessionStorage.removeItem('active_activity_key_aereo-vazio')
+      toast.success('Atividade finalizada com sucesso!')
     } catch (erro) {
-      return {
-        success: false,
-        message: 'Falha ao finalizar a atividade'
-      };
+      toast.error('Falha ao finalizar a atividade')
     }
   }
 
-  function getActivity(act: DadosDaAtividade) {
-    finishCurrentActivity(act)
-    window.location.reload()
+  async function getActivity(act: DadosDaAtividade) {
+    await finishCurrentActivity(act)
+    window.location.href = originHref || '/pages/kit-ferramentas'
   }
 
   async function onSubmit(values: z.infer<typeof SchemaAereoVazio>) {
@@ -91,13 +96,11 @@ export default function EnderecoVazio({ activity }: { activity: DadosDaAtividade
       activityID: values.activityID,
       activityName: values.activityName,
       loadAddress: values.loadAddress,
-      activityDate: Date.now()
+      activityDate: new Date().toISOString().split('T')[0]
     }
 
     const result = await pushTaskActivity(data)
-    if (result.success) {
-      toast.success(result.message)
-    } else {
+    if (!result.success) {
       toast.error(result.message)
     }
     setTimeout(() => loadAddressRef.current?.focus(), 150)

@@ -28,7 +28,7 @@ export default function AereoVazioForm() {
             }
             setActivityData({
                 activityUserCenter: session?.user?.center || '',
-                activityUserID: session?.user?.id || '',
+                activityUserID: session?.user?.registrationNumber || '',
                 activtyUserName: session?.user?.name || '',
                 activityName: 'Aereo Vazio',
                 activityID: generateActivityId('Aéreo Vazio'),
@@ -56,7 +56,7 @@ export default function AereoVazioForm() {
 
     return (
         <div className="flex flex-col w-full h-full">
-            <EnderecoVazio activity={activityData} />
+            <EnderecoVazio activity={activityData} originHref="/pages/kit-ferramentas/aereo-vazio" />
         </div>
     )
 }

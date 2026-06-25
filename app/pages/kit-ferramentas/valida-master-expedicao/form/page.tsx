@@ -28,10 +28,10 @@ export default function ValidaMasterExpedicaoForm() {
             }
             setActivityData({
                 activityUserCenter: session?.user?.center || '',
-                activityUserID: session?.user?.id || '',
+                activityUserID: session?.user?.registrationNumber || '',
                 activtyUserName: session?.user?.name || '',
-                activityName: 'Validação Master',
-                activityID: generateActivityId('Validação Master'),
+                activityName: 'Validação Master de Expedição',
+                activityID: generateActivityId('Validação Master de Expedição'),
             })
             setReady(true)
         }
@@ -56,7 +56,7 @@ export default function ValidaMasterExpedicaoForm() {
 
     return (
         <div className="flex flex-col w-full h-full">
-            <FormValidaMasterExpedicao atividade={activityData} />
+            <FormValidaMasterExpedicao atividade={activityData} originHref="/pages/kit-ferramentas/valida-master-expedicao" />
         </div>
     )
 }

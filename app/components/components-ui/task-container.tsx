@@ -1,15 +1,17 @@
 'use client';
 
-import { DataSnapshot, onChildAdded, onChildChanged, ref, remove, query, orderByChild, equalTo, get, update } from "firebase/database";
+import { DataSnapshot, onChildAdded, onChildChanged, ref, query, orderByChild, equalTo, get } from "firebase/database";
 import { db } from "@/app/firebasekey/keyapi";
+import { useSession } from "next-auth/react";
 
 import * as XLSX from "xlsx";
 import { CheckCircle } from "lucide-react";
 
 import { useState, useEffect, useMemo } from "react";
 
-import { AtividadeProps } from "@/app/types/TasksProps";
+import { AtividadeProps, TaskItem } from "@/app/types/TasksProps";
 import { fullDate, fullDatePrint, hourPrint } from "@/app/utils/ger-dates";
+import { finishActivity, deleteActivity } from "@/app/services/activityService";
 import ModalConfirm from "./modal-confirm";
 
 function ContainerTasks() {
@@ -19,17 +21,19 @@ function ContainerTasks() {
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteTarget, setDeleteTarget] = useState<AtividadeProps | null>(null);
     const [selectedDate, setSelectedDate] = useState(fullDate())
-    const [selectedCenter, setSelectedCenter] = useState('1046');
+    const { data: session } = useSession()
+    const userCenter = session?.user?.center || ''
 
-    const itemsPerPage = 8;
+    const itemsPerPage = 7;
 
     const parts = selectedDate.split('/');
     const isoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-    const dateCenter = `${isoDate}_${selectedCenter}`;
+    const dateCenter = `${isoDate}_${userCenter}`;
 
     const dbQuery = query(ref(db, 'activities'), orderByChild('activityDateCenter'), equalTo(dateCenter));
 
     useEffect(() => {
+        if (!userCenter) return
         setTasks([])
         setCurrentPage(0)
 
@@ -58,7 +62,7 @@ function ContainerTasks() {
             unsubscribeAdd();
             unsubscribeChange();
         };
-    }, [selectedDate, selectedCenter]);
+    }, [selectedDate, userCenter]);
 
     useEffect(() => {
         setCurrentPage(0);
@@ -66,8 +70,14 @@ function ContainerTasks() {
 
     const { paginatedData, totalPages } = useMemo(() => {
 
+        const term = searchTerm.toLowerCase();
         const filtered = tasks.filter(task => {
-            return task.activity.activityID.toLowerCase().includes(searchTerm.toLowerCase());
+            return (
+                (task.activity.activityID || '').toLowerCase().includes(term) ||
+                (task.activity.activityName || '').toLowerCase().includes(term) ||
+                (task.activity.activtyUserName || '').toLowerCase().includes(term) ||
+                (task.activity.activityUserID || '').toLowerCase().includes(term)
+            );
         });
 
         const pages = Math.ceil(filtered.length / itemsPerPage);
@@ -83,32 +93,82 @@ function ContainerTasks() {
 
     }, [tasks, searchTerm, currentPage]);
 
-    function exportAll() {
-        const data = tasks.map(t => ({
-            Código: t.activity.activityID,
-            Atividade: t.activity.activityName,
-            Usuário: t.activity.activtyUserName,
-            Data: fullDatePrint(t.activity.activityInitDate),
-            Hora: hourPrint(t.activity.activityInitDate),
-            Centro: t.activity.activityLocalWork,
-            Situação: t.activity.activityState ? "Ativa" : "Finalizada",
-        }))
+    function formatDateSafe(dateVal: unknown): string {
+        if (!dateVal) return ''
+        const str = String(dateVal)
+        const parts = str.split('-')
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`
+        }
+        return str
+    }
+
+    async function fetchTasksForActivity(activityKey: string): Promise<TaskItem[]> {
+        const snap = await get(query(ref(db, 'tasks'), orderByChild('activityRef'), equalTo(activityKey)))
+        const items: TaskItem[] = []
+        snap.forEach((childSnap) => {
+            items.push({ ...childSnap.val() as TaskItem, _firebaseKey: childSnap.key! })
+        })
+        return items
+    }
+
+    async function exportAll() {
+        const allNested = await Promise.all(tasks.map(t => fetchTasksForActivity(t._firebaseKey!)))
+        const allTasks = allNested.flat()
+        if (allTasks.length === 0) return
+
+        const activityMap = new Map(tasks.map(a => [a._firebaseKey, a.activity]))
+        const data = allTasks.map(t => {
+            const activity = activityMap.get(t.activityRef || '')
+            const validStr = t.loadValid || ''
+            const validFormatted = validStr.length === 8
+                ? `${validStr.slice(0, 2)}/${validStr.slice(2, 4)}/${validStr.slice(4, 8)}`
+                : validStr
+            return {
+                Centro: userCenter ? `Centro ${userCenter}` : '',
+                Tarefa: t.activityID || '',
+                Endereço: t.loadAddress || '',
+                Produto: t.loadProduct || '',
+                Quantidade: t.loadQuant || '',
+                Validade: validFormatted,
+                Operador: activity?.activtyUserName || '',
+                Data: formatDateSafe(t.activityDate),
+                Hora: t.createdAt ? hourPrint(t.createdAt) : '',
+                Atividade: t.activityName || '',
+            }
+        })
+
         const ws = XLSX.utils.json_to_sheet(data)
         const wb = XLSX.utils.book_new()
         XLSX.utils.book_append_sheet(wb, ws, "Tarefas")
         XLSX.writeFile(wb, `tarefas-pce-${selectedDate.replace(/\//g, "-")}.xlsx`)
     }
 
-    function exportIndividual(task: AtividadeProps) {
-        const data = [{
-            Código: task.activity.activityID,
-            Atividade: task.activity.activityName,
-            Usuário: task.activity.activtyUserName,
-            Data: fullDatePrint(task.activity.activityInitDate),
-            Hora: hourPrint(task.activity.activityInitDate),
-            Centro: task.activity.activityLocalWork,
-            Situação: task.activity.activityState ? "Ativa" : "Finalizada",
-        }]
+    async function exportIndividual(task: AtividadeProps) {
+        const key = task._firebaseKey
+        if (!key) return
+        const tasksForActivity = await fetchTasksForActivity(key)
+        if (tasksForActivity.length === 0) return
+
+        const data = tasksForActivity.map(t => {
+            const validStr = t.loadValid || ''
+            const validFormatted = validStr.length === 8
+                ? `${validStr.slice(0, 2)}/${validStr.slice(2, 4)}/${validStr.slice(4, 8)}`
+                : validStr
+            return {
+                Centro: userCenter ? `Centro ${userCenter}` : '',
+                Tarefa: t.activityID || '',
+                Endereço: t.loadAddress || '',
+                Produto: t.loadProduct || '',
+                Quantidade: t.loadQuant || '',
+                Validade: validFormatted,
+                Operador: task.activity.activtyUserName || '',
+                Data: formatDateSafe(t.activityDate),
+                Hora: t.createdAt ? hourPrint(t.createdAt) : '',
+                Atividade: t.activityName || '',
+            }
+        })
+
         const ws = XLSX.utils.json_to_sheet(data)
         const wb = XLSX.utils.book_new()
         XLSX.utils.book_append_sheet(wb, ws, "Tarefa")
@@ -116,35 +176,24 @@ function ContainerTasks() {
     }
 
     async function handleFinish(task: AtividadeProps) {
-        await update(ref(db), {
-            [`activities/${task._firebaseKey}/activityState`]: false,
-            [`activities/${task._firebaseKey}/activityFinishDate`]: Date.now(),
+        await finishActivity({
+            activityUserCenter: '',
+            activityID: task.activity.activityID || '',
+            activityName: task.activity.activityName || '',
+            activityUserID: task.activity.activityUserID || '',
+            _firebaseKey: task._firebaseKey,
         });
     }
 
     async function handleDelete() {
         if (!deleteTarget?._firebaseKey) return
-
-        const activityKey = deleteTarget._firebaseKey
-
-        const tasksQuery = query(ref(db, 'tasks'), orderByChild('activityRef'), equalTo(activityKey))
-        const tasksSnap = await get(tasksQuery)
-        if (tasksSnap.exists()) {
-            const promises: Promise<void>[] = []
-            tasksSnap.forEach((child) => {
-                promises.push(remove(child.ref))
-            })
-            await Promise.all(promises)
-        }
-
-        await remove(ref(db, `activities/${activityKey}`))
-
-        setTasks(prev => prev.filter(t => t._firebaseKey !== activityKey))
+        await deleteActivity(deleteTarget._firebaseKey, deleteTarget.activity.activityUserID)
+        setTasks(prev => prev.filter(t => t._firebaseKey !== deleteTarget._firebaseKey))
         setDeleteTarget(null)
     }
 
   return (
-    <div className="flex flex-col gap-4 w-full h-full p-2">
+    <div className="flex flex-col gap-6 w-full h-full p-4">
         <div className="flex gap-2 flex-wrap">
             <input
                 type="date"
@@ -153,34 +202,27 @@ function ContainerTasks() {
                     const [year, month, day] = e.target.value.split('-')
                     setSelectedDate(`${day}/${month}/${year}`)
                 }}
-                className="border p-2 rounded text-zinc-800"
+                className="border border-zinc-900/20 p-2 rounded-3xl text-zinc-800"
             />
             <input
                 type="text"
-                placeholder="Centro (Ex: 1046)"
-                value={selectedCenter}
-                onChange={(e) => setSelectedCenter(e.target.value)}
-                className="border p-2 rounded w-24 text-zinc-800"
-            />
-            <input
-                type="text"
-                placeholder="Buscar tarefa pelo nome..."
+                placeholder="Buscar por código, atividade, operador..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="border p-2 rounded flex-1 min-w-[200px] text-zinc-800"
+                className="border border-zinc-900/20 p-2 rounded-3xl flex-1 min-w-[200px] text-zinc-800"
             />
             <button
-                onClick={exportAll}
-                className="px-4 py-2 rounded-lg bg-zinc-950 text-white hover:bg-zinc-800 cursor-pointer text-sm whitespace-nowrap"
+                onClick={() => exportAll()}
+                className="px-4 py-2 rounded-[var(--radius)] bg-zinc-950 text-white hover:bg-zinc-800 cursor-pointer text-sm whitespace-nowrap"
             >
                 Exportar Todas
             </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto border border-zinc-900 rounded-lg p-2">
+        <div className="flex-1 min-h-0 overflow-y-auto border border-zinc-900/20 rounded-[var(--radius)] p-1">
             <div className="flex flex-col gap-2">
                 {paginatedData.map((task, index) => (
-                    <div key={task._firebaseKey || index} className="flex flex-col bg-zinc-200 rounded-lg p-3 gap-1">
+                    <div key={task._firebaseKey || index} className="flex flex-col bg-zinc-200 rounded-[var(--radius)] py-1 px-8 ">
                         <div className="flex items-center gap-4 text-sm flex-wrap">
                             <span className="min-w-0 flex-1">
                                 <strong>Código:</strong> {task.activity.activityID}
@@ -244,7 +286,7 @@ function ContainerTasks() {
 
         <div className="flex justify-around items-center w-full">
             <button
-                className="w-32 py-2 rounded-2xl bg-zinc-950 text-white text-sm disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                className="w-32 py-2 rounded-[var(--radius)] bg-zinc-950 text-white text-sm disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
                 disabled={currentPage === 0}
                 onClick={() => setCurrentPage(p => p - 1)}
             >
@@ -254,7 +296,7 @@ function ContainerTasks() {
             <span className="text-zinc-950 text-sm">Página {currentPage + 1} de {totalPages}</span>
 
             <button
-                className="w-32 py-2 rounded-2xl bg-zinc-950 text-white text-sm disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                className="w-32 py-2 rounded-[var(--radius)] bg-zinc-950 text-white text-sm disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
                 disabled={currentPage >= totalPages - 1}
                 onClick={() => setCurrentPage(p => p + 1)}
             >

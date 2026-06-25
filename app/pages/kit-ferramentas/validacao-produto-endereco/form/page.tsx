@@ -28,10 +28,10 @@ export default function ValidarEnderecoProdutoForm() {
             }
             setActivityData({
                 activityUserCenter: session?.user?.center || '',
-                activityUserID: session?.user?.id || '',
+                activityUserID: session?.user?.registrationNumber || '',
                 activtyUserName: session?.user?.name || '',
-                activityName: 'Produto x Endereço',
-                activityID: generateActivityId('Produto x Endereço'),
+                activityName: 'Validação de Produto e Endereço',
+                activityID: generateActivityId('Validação de Produto e Endereço'),
             })
             setReady(true)
         }
@@ -56,7 +56,7 @@ export default function ValidarEnderecoProdutoForm() {
 
     return (
         <div className="flex flex-col w-full h-full">
-            <FormValidarEnderecoProduto activity={activityData} />
+            <FormValidarEnderecoProduto activity={activityData} originHref="/pages/kit-ferramentas/validacao-produto-endereco" />
         </div>
     )
 }

@@ -34,7 +34,7 @@ export default function QuarentenaFracionada() {
             }
             setActivityData({
                 activityUserCenter: session?.user?.center || '',
-                activityUserID: session?.user?.id || '',
+                activityUserID: session?.user?.registrationNumber || '',
                 activtyUserName: session?.user?.name || '',
                 activityName: 'Quarentena Fracionada',
                 activityID: generateActivityId('Quarentena Fracionada'),
@@ -62,7 +62,7 @@ export default function QuarentenaFracionada() {
 
     return (
         <div className="flex flex-col w-full h-full">
-            <FormQuarentenaFracionada atividade={activityData} />
+            <FormQuarentenaFracionada atividade={activityData} originHref="/pages/kit-ferramentas/quarentena-fracionada" />
         </div>
     )
 }

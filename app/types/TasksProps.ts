@@ -46,6 +46,7 @@ export interface TaskItem {
     loadValid?: string
     validMaster?: string
     createdAt: number
+    _firebaseKey?: string
 }
 
 export interface UserProps {

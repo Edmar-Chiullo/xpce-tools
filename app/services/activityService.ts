@@ -1,6 +1,5 @@
 import { ref, push, update, query, orderByChild, equalTo, get } from "firebase/database"
 import { db } from "@/app/firebasekey/keyapi"
-import { fullDate } from "@/app/utils/ger-dates"
 
 function getTodayISO() {
     const d = new Date()
@@ -18,58 +17,31 @@ export async function findOrCreateActivity(
     activity: { activityUserCenter: string; activityID: string; activityName: string; activtyUserName?: string; activityUserID?: string; activityLocalWork?: string },
     date?: string
 ): Promise<string> {
-    const { activityDate, activityDateCenter, activityDateCenterID } = makeDateCenterID(activity, date)
-
-    const q = query(ref(db, 'activities'), orderByChild('activityDateCenterID'), equalTo(activityDateCenterID))
-    const snap = await get(q)
-
-    if (snap.exists()) {
-        let key = ''
-        snap.forEach((child) => { key = child.key! })
-        return key
+    const res = await fetch('/api/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'findOrCreate', activity, date }),
+    })
+    if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.message || 'Falha ao criar atividade')
     }
-
-    const newActivity = {
-        activityID: activity.activityID,
-        activityName: activity.activityName,
-        activityUserCenter: activity.activityUserCenter,
-        activityUserID: activity.activityUserID || '',
-        activtyUserName: activity.activtyUserName || '',
-        activityState: true,
-        activityLocalWork: activity.activityLocalWork || '',
-        activityStreet: '',
-        activitySide: '',
-        activityInitDate: Date.now(),
-        activityFinishDate: 0,
-        activityDate,
-        activityDateCenter,
-        activityDateCenterID,
-    }
-
-    const result = await push(ref(db, 'activities'), newActivity)
-    return result.key!
+    const data = await res.json()
+    return data.key
 }
 
 export async function finishActivity(
-    activity: { activityUserCenter: string; activityID: string; activityName: string },
+    activity: { activityUserCenter: string; activityID: string; activityName: string; _firebaseKey?: string; activityUserID?: string },
     date?: string
 ): Promise<boolean> {
-    const { activityDateCenterID } = makeDateCenterID(activity, date)
-
-    const q = query(ref(db, 'activities'), orderByChild('activityDateCenterID'), equalTo(activityDateCenterID))
-    const snap = await get(q)
-
-    if (!snap.exists()) return false
-
-    let key = ''
-    snap.forEach((child) => { key = child.key! })
-
-    await update(ref(db), {
-        [`activities/${key}/activityState`]: false,
-        [`activities/${key}/activityFinishDate`]: Date.now(),
+    const res = await fetch('/api/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'finish', activity, date, _firebaseKey: activity._firebaseKey, activityUserID: activity.activityUserID }),
     })
-
-    return true
+    if (!res.ok) return false
+    const data = await res.json()
+    return data.success === true
 }
 
 export async function createTask(
@@ -77,21 +49,26 @@ export async function createTask(
     taskType: string,
     data: Record<string, any>
 ): Promise<string> {
-    const task = {
-        activityRef,
-        activityID: data.activityID || '',
-        activityName: data.activityName || '',
-        activityUserCenter: data.activityUserCenter || '',
-        activityDate: getTodayISO(),
-        taskType,
-        loadAddress: data.loadAddress || null,
-        loadProduct: data.loadProduct || null,
-        loadQuant: data.loadQuant || null,
-        loadValid: data.loadValid || null,
-        validMaster: data.validMaster || null,
-        createdAt: Date.now(),
+    const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activityRef, taskType, data }),
+    })
+    if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.message || 'Falha ao criar task')
     }
+    const result = await res.json()
+    return result.key
+}
 
-    const result = await push(ref(db, 'tasks'), task)
-    return result.key!
+export async function deleteActivity(activityKey: string, userId?: string): Promise<boolean> {
+    const params = new URLSearchParams({ key: activityKey })
+    if (userId) params.set('userId', userId)
+    const res = await fetch(`/api/activities?${params.toString()}`, {
+        method: 'DELETE',
+    })
+    if (!res.ok) return false
+    const data = await res.json()
+    return data.success === true
 }

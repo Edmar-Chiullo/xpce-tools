@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { ref, get, child, query, orderByChild, equalTo } from "firebase/database"
+import { ref, get } from "firebase/database"
 import { db } from "@/app/firebasekey/keyapi"
 
 interface ToolStarterProps {
@@ -22,38 +22,26 @@ export default function ToolStarter({ activityName, formHref }: ToolStarterProps
         async function checkContinuity() {
             setLoading(true)
 
-            const localKey = localStorage.getItem(`activity_${activityName}`)
-
-            if (localKey) {
+            // buscar no nó active-activities/{matricula} — O(1), sem varredura
+            if (session?.user?.registrationNumber && status === "authenticated") {
                 try {
-                    const snap = await get(child(ref(db), `activities/${localKey}`))
-                    if (snap.exists()) {
-                        const data = snap.val()
-                        if (data.activityState === true) {
-                            setStoredKey(localKey)
-                            setHasOpenActivity(true)
-                            setLoading(false)
-                            return
-                        }
-                    }
-                } catch {}
-                localStorage.removeItem(`activity_${activityName}`)
-            }
+                    const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+                    const targetWords = normalize(activityName.replace(/-/g, ' ')).split(' ')
+                    const activeSnap = await get(ref(db, `active-activities/${session.user.registrationNumber}`))
 
-            if (session?.user?.id && status === "authenticated") {
-                try {
-                    const q = query(ref(db, 'activities'), orderByChild('activityUserID'), equalTo(session.user.id))
-                    const snap = await get(q)
-                    if (snap.exists()) {
+                    if (activeSnap.exists()) {
                         let foundKey = ''
-                        snap.forEach((child) => {
+                        activeSnap.forEach((child) => {
                             const data = child.val()
-                            if (data.activityState === true && data.activityName?.toLowerCase().includes(activityName.replace(/-/g, ' '))) {
+                            const storedName = normalize(data.activityName || '')
+                            const allMatch = targetWords.every(tw => storedName.includes(tw))
+                            if (allMatch) {
                                 foundKey = child.key!
+                                return true
                             }
                         })
+
                         if (foundKey) {
-                            localStorage.setItem(`activity_${activityName}`, foundKey)
                             setStoredKey(foundKey)
                             setHasOpenActivity(true)
                             setLoading(false)
