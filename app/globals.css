@@ -44,3 +44,76 @@ body {
   color: hsl(var(--foreground));
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
+
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  input,
+  button,
+  select,
+  textarea {
+    display: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  * {
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  nav,
+  .no-print,
+  input,
+  button,
+  select,
+  textarea {
+    display: none !important;
+  }
+
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  th,
+  td {
+    border: 1px solid #000 !important;
+    padding: 6px !important;
+  }
+
+  code {
+    font-size: 10pt !important;
+  }
+
+  h2 {
+    font-size: 18pt !important;
+    margin-top: 24pt !important;
+  }
+
+  h3 {
+    font-size: 14pt !important;
+    margin-top: 16pt !important;
+  }
+
+  p,
+  li {
+    font-size: 11pt !important;
+  }
+}

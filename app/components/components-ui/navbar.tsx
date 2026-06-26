@@ -5,7 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import clsx from "clsx";
 import Link from "next/link";
 import { useIdleLogout } from "@/app/hooks/useIdleLogout";
-import { LayoutDashboard, ClipboardList, Wrench, Users, Settings, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Wrench, Users, Settings, LogOut, Home, Printer, BookOpen } from "lucide-react";
 
 interface NavItem {
   href: string
@@ -19,6 +19,8 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/pages/dashboard", label: "Dashboard", icon: LayoutDashboard, permissions: ["admin", "gerente", "pce-analytics"] },
   { href: "/pages/taskpainel", label: "Tarefas", icon: ClipboardList, permissions: ["admin", "gerente", "pce-analytics"] },
   { href: "/pages/kit-ferramentas", label: "Ferramentas", icon: Wrench, permissions: ["admin", "gerente", "pce-analytics", "pce-operation"] },
+  { href: "/pages/utilitarios", label: "Utilitários", icon: Printer, permissions: ["admin", "gerente", "pce-analytics", "pce-operation"] },
+  { href: "/pages/docs", label: "Documentação", icon: BookOpen, permissions: ["admin", "gerente", "pce-analytics", "pce-operation"] },
   { href: "/pages/users", label: "Usuários", icon: Users, permissions: ["admin", "gerente"] },
   { href: "/pages/admin/migrate", label: "Migração", icon: Settings, permissions: ["admin"] },
 ];

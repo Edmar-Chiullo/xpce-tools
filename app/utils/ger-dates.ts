@@ -1,4 +1,3 @@
-
 function addLeftZZero(value:number) {
     return value < 10 ? `0${value}` : value 
 }
@@ -42,4 +41,19 @@ export function dateDb() {
     const date = Date.now()  
 
     return date
+}
+
+export function dateFichaPallet(date: unknown): string {
+    if (typeof date === 'number') {
+        const excelEpoch = new Date(1899, 11, 30);
+        const result = new Date(excelEpoch.getTime() + date * 86400000);
+        const dd = String(result.getDate()).padStart(2, '0');
+        const mm = String(result.getMonth() + 1).padStart(2, '0');
+        const yyyy = result.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+    }
+    if (typeof date === 'string') {
+        return date;
+    }
+    return '';
 }
