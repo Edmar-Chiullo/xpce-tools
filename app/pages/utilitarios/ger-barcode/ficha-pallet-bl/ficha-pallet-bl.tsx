@@ -5,7 +5,7 @@ import FileUploader from '@/app/components/components-ui/ficha-pallet/FileUpload
 import TargetBarcodePrint from '@/app/components/components-ui/ficha-pallet/TargetBarcodePrint';
 
 
-export default function FichaPallet() {
+export default function FichaPalletBl() {
   const [data, setData] = useState<any[]>([]);
 
   return (

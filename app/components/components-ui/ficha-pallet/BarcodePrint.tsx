@@ -17,13 +17,11 @@ interface BarcodeData {
 export default function BarcodePrint({ data }: { data: BarcodeData[] }) {
   const contentRef = useRef<HTMLDivElement>(null)
 
-   const handlePrint = useReactToPrint({
+  const handlePrint = useReactToPrint({
     contentRef,
     documentTitle: 'Etiquetas',
-    pageStyle: '@page { size: A4 landscape; margin: 10mm; }',
     onAfterPrint: () => console.log('Impressão concluída'),
   })
-
 
 
 
@@ -57,6 +55,7 @@ export default function BarcodePrint({ data }: { data: BarcodeData[] }) {
       <button onClick={handlePrint} className="no-print bg-zinc-950 text-white p-2 rounded-md hover:scale-[1.01] cursor-pointer">Imprimir</button>
 
       <div ref={contentRef}>
+        <style>{'@page { size: A4 landscape; margin: 10mm; }'}</style>
         <div className="overflow-x-hidden overflow-y-auto">
           {data.map((item, i) => (
             <div key={i} className="page-break flex flex-col items-center justify-end gap-5 md:gap-[20px] p-4 md:p-[20px]">

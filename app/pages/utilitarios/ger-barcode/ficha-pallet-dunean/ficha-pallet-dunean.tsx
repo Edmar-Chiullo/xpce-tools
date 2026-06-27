@@ -3,7 +3,7 @@ import { useState } from 'react';
 import FileUploader from '@/app/components/components-ui/ficha-pallet/FileUploader';
 import AdressBarcodePrint from '@/app/components/components-ui/ficha-pallet/AdressBarcodePrint';
 
-export default function FichaPalletBl() {
+export default function FichaPalletDunean() {
   const [data, setData] = useState<any[]>([]);
 
   return (
