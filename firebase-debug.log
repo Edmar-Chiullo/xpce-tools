@@ -1,0 +1,171 @@
+[debug] [2026-06-25T13:10:52.997Z] ----------------------------------------------------------------------
+[debug] [2026-06-25T13:10:53.002Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\liteidtech\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --project app-logistica-8171a
+[debug] [2026-06-25T13:10:53.002Z] CLI Version:   13.29.1
+[debug] [2026-06-25T13:10:53.003Z] Platform:      win32
+[debug] [2026-06-25T13:10:53.003Z] Node Version:  v22.13.0
+[debug] [2026-06-25T13:10:53.003Z] Time:          Thu Jun 25 2026 10:10:53 GMT-0300 (Horário Padrão de Brasília)
+[debug] [2026-06-25T13:10:53.003Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-25T13:10:53.013Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-06-25T13:10:53.229Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-25T13:10:53.230Z] > authorizing via signed-in user (ecschiullo@gmail.com)
+[debug] [2026-06-25T13:10:53.669Z] java version "22.0.1" 2024-04-16
+
+[debug] [2026-06-25T13:10:53.670Z] Java(TM) SE Runtime Environment (build 22.0.1+8-16)
+Java HotSpot(TM) 64-Bit Server VM (build 22.0.1+8-16, mixed mode, sharing)
+
+[debug] [2026-06-25T13:10:53.708Z] Parsed Java major version: 22
+[info] i  emulators: Starting emulators: auth, database {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, database"}}
+[debug] [2026-06-25T13:10:53.729Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-25T13:10:53.729Z] assigned listening specs for emulators {"user":{"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"database":[{"address":"127.0.0.1","family":"IPv4","port":9000}],"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-06-25T13:10:53.739Z] [hub] writing locator at C:\Users\LITEID~1\AppData\Local\Temp\hub-app-logistica-8171a.json
+[debug] [2026-06-25T13:10:53.750Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-06-25T13:10:53.751Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-06-25T13:10:53.775Z] Checked if tokens are valid: false, expires at: 1771975146591
+[debug] [2026-06-25T13:10:53.776Z] Checked if tokens are valid: false, expires at: 1771975146591
+[debug] [2026-06-25T13:10:53.776Z] > refreshing access token with scopes: []
+[debug] [2026-06-25T13:10:53.778Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-06-25T13:10:53.779Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-06-25T13:10:54.165Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-06-25T13:10:54.165Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-06-25T13:10:54.193Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/app-logistica-8171a [none]
+[debug] [2026-06-25T13:11:56.512Z] ----------------------------------------------------------------------
+[debug] [2026-06-25T13:11:56.517Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\liteidtech\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --project app-logistica-8171a
+[debug] [2026-06-25T13:11:56.517Z] CLI Version:   13.29.1
+[debug] [2026-06-25T13:11:56.517Z] Platform:      win32
+[debug] [2026-06-25T13:11:56.517Z] Node Version:  v22.13.0
+[debug] [2026-06-25T13:11:56.518Z] Time:          Thu Jun 25 2026 10:11:56 GMT-0300 (Horário Padrão de Brasília)
+[debug] [2026-06-25T13:11:56.518Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-25T13:11:56.644Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-25T13:11:56.645Z] > authorizing via signed-in user (ecschiullo@gmail.com)
+[debug] [2026-06-25T13:11:56.843Z] java version "22.0.1" 2024-04-16
+
+[debug] [2026-06-25T13:11:56.844Z] Java(TM) SE Runtime Environment (build 22.0.1+8-16)
+Java HotSpot(TM) 64-Bit Server VM (build 22.0.1+8-16, mixed mode, sharing)
+
+[debug] [2026-06-25T13:11:56.899Z] Parsed Java major version: 22
+[info] i  emulators: Starting emulators: auth, database {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, database"}}
+[debug] [2026-06-25T13:11:56.926Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-25T13:11:56.926Z] assigned listening specs for emulators {"user":{"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"database":[{"address":"127.0.0.1","family":"IPv4","port":9000}],"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project app-logistica-8171a. This may result in unexpected behavior. 
+[debug] [2026-06-25T13:11:56.935Z] [hub] writing locator at C:\Users\LITEID~1\AppData\Local\Temp\hub-app-logistica-8171a.json
+[debug] [2026-06-25T13:11:56.946Z] Checked if tokens are valid: true, expires at: 1782396653165
+[debug] [2026-06-25T13:11:56.946Z] Checked if tokens are valid: true, expires at: 1782396653165
+[debug] [2026-06-25T13:11:56.948Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/app-logistica-8171a [none]
+[debug] [2026-06-25T13:11:57.854Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/app-logistica-8171a 200
+[debug] [2026-06-25T13:11:57.854Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/app-logistica-8171a {"projectId":"app-logistica-8171a","projectNumber":"506232644626","displayName":"app logistica","name":"projects/app-logistica-8171a","resources":{"hostingSite":"app-logistica-8171a","realtimeDatabaseInstance":"app-logistica-8171a-default-rtdb"},"state":"ACTIVE","etag":"1_60ca92a2-4abf-4de6-baaf-5a8f70f7be03"}
+[debug] [2026-06-25T13:11:57.854Z] database rules config:  []
+[warn] !  database: Did not find a Realtime Database rules file specified in a firebase.json config file. The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration. {"metadata":{"emulator":{"name":"database"},"message":"Did not find a Realtime Database rules file specified in a firebase.json config file. The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration."}}
+[debug] [2026-06-25T13:11:57.871Z] Ignoring unsupported arg: projectId {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: projectId"}}
+[debug] [2026-06-25T13:11:57.871Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-06-25T13:11:57.871Z] Ignoring unsupported arg: rules {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: rules"}}
+[debug] [2026-06-25T13:11:57.871Z] Starting Database Emulator with command {"binary":"java","args":["-Duser.language=en","-jar","C:\\Users\\liteidtech\\.cache\\firebase\\emulators\\firebase-database-emulator-v4.11.2.jar","--host","127.0.0.1","--port",9000,"--single_project_mode","Warning"],"optionalArgs":["port","host","functions_emulator_port","functions_emulator_host","single_project_mode"],"joinArgs":false,"shell":false,"port":9000} {"metadata":{"emulator":{"name":"database"},"message":"Starting Database Emulator with command {\"binary\":\"java\",\"args\":[\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\liteidtech\\\\.cache\\\\firebase\\\\emulators\\\\firebase-database-emulator-v4.11.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",9000,\"--single_project_mode\",\"Warning\"],\"optionalArgs\":[\"port\",\"host\",\"functions_emulator_port\",\"functions_emulator_host\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":9000}"}}
+[info] i  database: Database Emulator logging to database-debug.log {"metadata":{"emulator":{"name":"database"},"message":"Database Emulator logging to \u001b[1mdatabase-debug.log\u001b[22m"}}
+[debug] [2026-06-25T13:12:10.591Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI            │
+├────────────────┼────────────────┼────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth     │
+├────────────────┼────────────────┼────────────────────────────────┤
+│ Database       │ 127.0.0.1:9000 │ http://127.0.0.1:4000/database │
+└────────────────┴────────────────┴────────────────────────────────┘
+  Emulator Hub running at 127.0.0.1:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2026-06-25T13:12:34.521Z] ----------------------------------------------------------------------
+[debug] [2026-06-25T13:12:34.525Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\liteidtech\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --project app-logistica-8171a
+[debug] [2026-06-25T13:12:34.525Z] CLI Version:   13.29.1
+[debug] [2026-06-25T13:12:34.525Z] Platform:      win32
+[debug] [2026-06-25T13:12:34.526Z] Node Version:  v22.13.0
+[debug] [2026-06-25T13:12:34.526Z] Time:          Thu Jun 25 2026 10:12:34 GMT-0300 (Horário Padrão de Brasília)
+[debug] [2026-06-25T13:12:34.526Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-25T13:12:34.655Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-25T13:12:34.656Z] > authorizing via signed-in user (ecschiullo@gmail.com)
+[debug] [2026-06-25T13:12:34.854Z] java version "22.0.1" 2024-04-16
+
+[debug] [2026-06-25T13:12:34.855Z] Java(TM) SE Runtime Environment (build 22.0.1+8-16)
+Java HotSpot(TM) 64-Bit Server VM (build 22.0.1+8-16, mixed mode, sharing)
+
+[debug] [2026-06-25T13:12:34.897Z] Parsed Java major version: 22
+[info] i  emulators: Starting emulators: auth, database {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, database"}}
+[debug] [2026-06-25T13:12:34.923Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-25T13:12:34.923Z] assigned listening specs for emulators {"user":{"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"database":[{"address":"127.0.0.1","family":"IPv4","port":9000}],"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project app-logistica-8171a. This may result in unexpected behavior. 
+[debug] [2026-06-25T13:12:34.931Z] [hub] writing locator at C:\Users\LITEID~1\AppData\Local\Temp\hub-app-logistica-8171a.json
+[debug] [2026-06-25T13:12:34.943Z] Checked if tokens are valid: true, expires at: 1782396653165
+[debug] [2026-06-25T13:12:34.944Z] Checked if tokens are valid: true, expires at: 1782396653165
+[debug] [2026-06-25T13:12:34.946Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/app-logistica-8171a [none]
+[debug] [2026-06-25T13:12:35.739Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/app-logistica-8171a 200
+[debug] [2026-06-25T13:12:35.740Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/app-logistica-8171a {"projectId":"app-logistica-8171a","projectNumber":"506232644626","displayName":"app logistica","name":"projects/app-logistica-8171a","resources":{"hostingSite":"app-logistica-8171a","realtimeDatabaseInstance":"app-logistica-8171a-default-rtdb"},"state":"ACTIVE","etag":"1_60ca92a2-4abf-4de6-baaf-5a8f70f7be03"}
+[debug] [2026-06-25T13:12:35.740Z] database rules config:  []
+[warn] !  database: Did not find a Realtime Database rules file specified in a firebase.json config file. The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration. {"metadata":{"emulator":{"name":"database"},"message":"Did not find a Realtime Database rules file specified in a firebase.json config file. The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration."}}
+[debug] [2026-06-25T13:12:35.743Z] Ignoring unsupported arg: projectId {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: projectId"}}
+[debug] [2026-06-25T13:12:35.743Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-06-25T13:12:35.743Z] Ignoring unsupported arg: rules {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: rules"}}
+[debug] [2026-06-25T13:12:35.744Z] Starting Database Emulator with command {"binary":"java","args":["-Duser.language=en","-jar","C:\\Users\\liteidtech\\.cache\\firebase\\emulators\\firebase-database-emulator-v4.11.2.jar","--host","127.0.0.1","--port",9000,"--single_project_mode","Warning"],"optionalArgs":["port","host","functions_emulator_port","functions_emulator_host","single_project_mode"],"joinArgs":false,"shell":false,"port":9000} {"metadata":{"emulator":{"name":"database"},"message":"Starting Database Emulator with command {\"binary\":\"java\",\"args\":[\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\liteidtech\\\\.cache\\\\firebase\\\\emulators\\\\firebase-database-emulator-v4.11.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",9000,\"--single_project_mode\",\"Warning\"],\"optionalArgs\":[\"port\",\"host\",\"functions_emulator_port\",\"functions_emulator_host\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":9000}"}}
+[info] i  database: Database Emulator logging to database-debug.log {"metadata":{"emulator":{"name":"database"},"message":"Database Emulator logging to \u001b[1mdatabase-debug.log\u001b[22m"}}
+[debug] [2026-06-25T13:13:44.256Z] ----------------------------------------------------------------------
+[debug] [2026-06-25T13:13:44.260Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\liteidtech\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --project app-logistica-8171a
+[debug] [2026-06-25T13:13:44.261Z] CLI Version:   13.29.1
+[debug] [2026-06-25T13:13:44.261Z] Platform:      win32
+[debug] [2026-06-25T13:13:44.261Z] Node Version:  v22.13.0
+[debug] [2026-06-25T13:13:44.261Z] Time:          Thu Jun 25 2026 10:13:44 GMT-0300 (Horário Padrão de Brasília)
+[debug] [2026-06-25T13:13:44.262Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-25T13:13:44.391Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-25T13:13:44.392Z] > authorizing via signed-in user (ecschiullo@gmail.com)
+[debug] [2026-06-25T13:13:44.591Z] java version "22.0.1" 2024-04-16
+
+[debug] [2026-06-25T13:13:44.592Z] Java(TM) SE Runtime Environment (build 22.0.1+8-16)
+Java HotSpot(TM) 64-Bit Server VM (build 22.0.1+8-16, mixed mode, sharing)
+
+[debug] [2026-06-25T13:13:44.627Z] Parsed Java major version: 22
+[info] i  emulators: Starting emulators: auth, database {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, database"}}
+[debug] [2026-06-25T13:13:44.660Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-25T13:13:44.660Z] assigned listening specs for emulators {"user":{"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"database":[{"address":"127.0.0.1","family":"IPv4","port":9000}],"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project app-logistica-8171a. This may result in unexpected behavior. 
+[debug] [2026-06-25T13:13:44.670Z] [hub] writing locator at C:\Users\LITEID~1\AppData\Local\Temp\hub-app-logistica-8171a.json
+[debug] [2026-06-25T13:13:44.682Z] Checked if tokens are valid: true, expires at: 1782396653165
+[debug] [2026-06-25T13:13:44.683Z] Checked if tokens are valid: true, expires at: 1782396653165
+[debug] [2026-06-25T13:13:44.685Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/app-logistica-8171a [none]
+[debug] [2026-06-25T13:13:45.480Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/app-logistica-8171a 200
+[debug] [2026-06-25T13:13:45.480Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/app-logistica-8171a {"projectId":"app-logistica-8171a","projectNumber":"506232644626","displayName":"app logistica","name":"projects/app-logistica-8171a","resources":{"hostingSite":"app-logistica-8171a","realtimeDatabaseInstance":"app-logistica-8171a-default-rtdb"},"state":"ACTIVE","etag":"1_60ca92a2-4abf-4de6-baaf-5a8f70f7be03"}
+[debug] [2026-06-25T13:13:45.481Z] database rules config:  [{"instance":"app-logistica-8171a-default-rtdb","rules":"C:\\Users\\liteidtech\\Documents\\Projetos-NextJs\\logistca\\pce-tools-logistica\\database.rules.json"}]
+[debug] [2026-06-25T13:13:45.487Z] Ignoring unsupported arg: projectId {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: projectId"}}
+[debug] [2026-06-25T13:13:45.487Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-06-25T13:13:45.487Z] Ignoring unsupported arg: rules {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: rules"}}
+[debug] [2026-06-25T13:13:45.487Z] Starting Database Emulator with command {"binary":"java","args":["-Duser.language=en","-jar","C:\\Users\\liteidtech\\.cache\\firebase\\emulators\\firebase-database-emulator-v4.11.2.jar","--host","127.0.0.1","--port",9000,"--single_project_mode","Warning"],"optionalArgs":["port","host","functions_emulator_port","functions_emulator_host","single_project_mode"],"joinArgs":false,"shell":false,"port":9000} {"metadata":{"emulator":{"name":"database"},"message":"Starting Database Emulator with command {\"binary\":\"java\",\"args\":[\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\liteidtech\\\\.cache\\\\firebase\\\\emulators\\\\firebase-database-emulator-v4.11.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",9000,\"--single_project_mode\",\"Warning\"],\"optionalArgs\":[\"port\",\"host\",\"functions_emulator_port\",\"functions_emulator_host\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":9000}"}}
+[info] i  database: Database Emulator logging to database-debug.log {"metadata":{"emulator":{"name":"database"},"message":"Database Emulator logging to \u001b[1mdatabase-debug.log\u001b[22m"}}
+[debug] [2026-06-25T13:13:56.444Z] >>> [apiv2][query] PUT http://127.0.0.1:9000/.settings/rules.json ns=app-logistica-8171a-default-rtdb
+[debug] [2026-06-25T13:13:56.445Z] >>> [apiv2][body] PUT http://127.0.0.1:9000/.settings/rules.json "{\n  \"rules\": {\n    \".read\": true,\n    \".write\": true,\n    \"activities\": {\n      \".indexOn\": [\"activityDateCenterID\", \"activityDateCenter\", \"activityUserID\"]\n    },\n    \"tasks\": {\n      \".indexOn\": [\"activityRef\"]\n    }\n  }\n}\n"
+[debug] [2026-06-25T13:13:57.215Z] <<< [apiv2][status] PUT http://127.0.0.1:9000/.settings/rules.json 200
+[debug] [2026-06-25T13:13:57.216Z] <<< [apiv2][body] PUT http://127.0.0.1:9000/.settings/rules.json {"status":"ok"}
+[debug] [2026-06-25T13:13:57.221Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI            │
+├────────────────┼────────────────┼────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth     │
+├────────────────┼────────────────┼────────────────────────────────┤
+│ Database       │ 127.0.0.1:9000 │ http://127.0.0.1:4000/database │
+└────────────────┴────────────────┴────────────────────────────────┘
+  Emulator Hub running at 127.0.0.1:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 

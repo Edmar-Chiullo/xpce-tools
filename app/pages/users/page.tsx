@@ -8,6 +8,7 @@ import CreateUserForm from "@/app/components/components-ui/form-cadastro/form-ca
 const PERMISSION_MAP: Record<string, string> = {
     admin: "Admin",
     gerente: "Gerente",
+    "pce-analytics2": "Ana. Logística 2",
     "pce-analytics": "Analista",
     "pce-operation": "Auxiliar",
 }
@@ -16,6 +17,7 @@ const PERMISSION_LEVELS = [
     { value: "", label: "Todas as funções" },
     { value: "admin", label: "Admin" },
     { value: "gerente", label: "Gerente" },
+    { value: "pce-analytics2", label: "Ana. Logística 2" },
     { value: "pce-analytics", label: "Analista" },
     { value: "pce-operation", label: "Auxiliar" },
 ]
@@ -35,7 +37,7 @@ const ITEMS_PER_PAGE = 7
 
 export default function UsersPage() {
     const { data: session } = useSession()
-    const isAdmin = session?.user?.permission === "admin" || session?.user?.permission === "gerente"
+    const isAdmin = session?.user?.permission === "admin" || session?.user?.permission === "gerente" || session?.user?.permission === "pce-analytics2"
 
     const [users, setUsers] = useState<UserData[]>([])
     const [loading, setLoading] = useState(true)
@@ -293,6 +295,7 @@ export default function UsersPage() {
                             } : undefined}
                             onSuccess={handleFormClose}
                             onCancel={() => setShowForm(false)}
+                            currentUserPermission={session?.user?.permission}
                         />
                     </div>
                 </div>

@@ -10,6 +10,8 @@ const sections = [
   { id: 'formato-dados', label: 'Formato de Dados' },
   { id: 'exemplo-planilha', label: 'Exemplo de Planilha' },
   { id: 'modulos-operacionais', label: 'Módulos Operacionais' },
+  { id: 'sessao-inatividade', label: 'Sessão e Inatividade' },
+  { id: 'perfis-usuario', label: 'Perfis de Usuário' },
 ]
 
 export default function DocsPage() {
@@ -300,10 +302,73 @@ export default function DocsPage() {
                 que os volumes estejam corretos antes do carregamento.
               </p>
 
-              <div className="flex items-center gap-2 text-sm text-zinc-400 border-t border-zinc-200 pt-4 mt-6">
-                <FileText className="w-4 h-4" />
-                <span>PCE Tools v0.1.0 — Documentação do Sistema</span>
+            <section id="sessao-inatividade">
+              <h2 className="text-2xl font-bold text-zinc-900 mb-4">6. Sessão e Inatividade</h2>
+              <p className="text-zinc-700 leading-relaxed mb-3">
+                Por segurança, a sessão do usuário expira automaticamente após <strong>5 minutos de inatividade</strong>.
+                Qualquer interação (movimento do mouse, clique, toque na tela ou digitação) reinicia o contador.
+              </p>
+              <p className="text-zinc-700 leading-relaxed mb-3">
+                Quando o tempo de inatividade é atingido, o sistema efetua logout automaticamente e
+                redireciona para a tela de login. Todas as atividades em andamento são preservadas no
+                banco de dados e podem ser retomadas após novo login.
+              </p>
+              <p className="text-zinc-700 leading-relaxed mb-3">
+                Esta política se aplica a todos os módulos do sistema, incluindo as ferramentas de coleta
+                e os utilitários de impressão.
+              </p>
+            </section>
+
+            <section id="perfis-usuario">
+              <h2 className="text-2xl font-bold text-zinc-900 mb-4">7. Perfis de Usuário</h2>
+              <p className="text-zinc-700 leading-relaxed mb-3">
+                O sistema conta com cinco níveis de permissão, cada um com acesso a funcionalidades específicas:
+              </p>
+
+              <div className="overflow-x-auto mb-6">
+                <table className="w-full text-sm border-collapse border border-zinc-300">
+                  <thead>
+                    <tr className="bg-zinc-100">
+                      <th className="border border-zinc-300 p-2 text-left font-semibold text-zinc-800">Perfil</th>
+                      <th className="border border-zinc-300 p-2 text-left font-semibold text-zinc-800">Acessos</th>
+                      <th className="border border-zinc-300 p-2 text-left font-semibold text-zinc-800">Pode Criar Usuários</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-zinc-300 p-2 font-medium">Aux. Logística</td>
+                      <td className="border border-zinc-300 p-2">Início, Ferramentas, Utilitários, Documentação</td>
+                      <td className="border border-zinc-300 p-2 text-red-600">Não</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-zinc-300 p-2 font-medium">Ana. Logística</td>
+                      <td className="border border-zinc-300 p-2">Início, Dashboard, Tarefas, Ferramentas, Utilitários, Documentação</td>
+                      <td className="border border-zinc-300 p-2 text-red-600">Não</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-zinc-300 p-2 font-medium">Ana. Logística 2</td>
+                      <td className="border border-zinc-300 p-2">Início, Dashboard, Tarefas, Ferramentas, Utilitários, Documentação, Usuários</td>
+                      <td className="border border-zinc-300 p-2 text-green-600">Sim (apenas Aux. e Ana. Logística)</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-zinc-300 p-2 font-medium">Gerente</td>
+                      <td className="border border-zinc-300 p-2">Início, Dashboard, Tarefas, Ferramentas, Utilitários, Documentação, Usuários</td>
+                      <td className="border border-zinc-300 p-2 text-green-600">Sim (exceto Admin)</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-zinc-300 p-2 font-medium">Admin</td>
+                      <td className="border border-zinc-300 p-2">Todos os módulos, incluindo Migração</td>
+                      <td className="border border-zinc-300 p-2 text-green-600">Sim (todos os perfis)</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+            </section>
+
+            <div className="flex items-center gap-2 text-sm text-zinc-400 border-t border-zinc-200 pt-4 mt-6">
+              <FileText className="w-4 h-4" />
+              <span>PCE Tools v0.1.0 — Documentação do Sistema</span>
+            </div>
             </section>
           </div>
         </div>

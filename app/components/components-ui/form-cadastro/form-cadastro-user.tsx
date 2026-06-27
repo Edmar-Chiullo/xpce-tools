@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 const PERMISSION_KEYS: Record<string, string> = {
     'Aux. Logistico': 'pce-operation',
     'Ana. Logistico': 'pce-analytics',
+    'Ana. Logistico 2': 'pce-analytics2',
     'Gerente': 'gerente',
     'Admin': 'admin',
 }
@@ -15,9 +16,18 @@ const PERMISSION_KEYS: Record<string, string> = {
 const ROLES = [
     { value: 'Aux. Logistico', label: 'Aux. Logística' },
     { value: 'Ana. Logistico', label: 'Ana. Logística' },
+    { value: 'Ana. Logistico 2', label: 'Ana. Logística 2' },
     { value: 'Gerente', label: 'Gerente' },
     { value: 'Admin', label: 'Admin' },
 ]
+
+const ROLE_HIERARCHY: Record<string, number> = {
+    'pce-operation': 0,
+    'pce-analytics': 1,
+    'pce-analytics2': 2,
+    'gerente': 3,
+    'admin': 4,
+}
 
 function reversePermission(perm: string): string {
     for (const [role, key] of Object.entries(PERMISSION_KEYS)) {
@@ -46,7 +56,7 @@ function firstLastName(fullName: string) {
 const baseSchema = {
     name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
     registrationNumber: z.string().regex(/^\d{7}$/, "Matrícula deve ter exatamente 7 dígitos."),
-    role: z.enum(['Aux. Logistico', 'Ana. Logistico', 'Gerente', 'Admin']),
+    role: z.enum(['Aux. Logistico', 'Ana. Logistico', 'Ana. Logistico 2', 'Gerente', 'Admin']),
     center: z.string().min(1, "O centro de trabalho é obrigatório."),
 }
 
@@ -75,10 +85,18 @@ interface CreateUserFormProps {
     editUser?: EditUserData
     onSuccess?: () => void
     onCancel?: () => void
+    currentUserPermission?: string
 }
 
-export default function CreateUser({ editUser, onSuccess, onCancel }: CreateUserFormProps) {
+export default function CreateUser({ editUser, onSuccess, onCancel, currentUserPermission }: CreateUserFormProps) {
     const isEdit = !!editUser
+    const currentLevel = ROLE_HIERARCHY[currentUserPermission || ''] ?? 4
+
+    const availableRoles = ROLES.filter((role) => {
+        const roleKey = PERMISSION_KEYS[role.value]
+        const roleLevel = ROLE_HIERARCHY[roleKey] ?? -1
+        return roleLevel <= currentLevel
+    })
 
     const schema = isEdit ? editSchema : createSchema
     type FormData = z.infer<typeof schema>
@@ -182,7 +200,7 @@ export default function CreateUser({ editUser, onSuccess, onCancel }: CreateUser
                 <label className="block mb-1 font-medium text-zinc-700 text-sm">Função</label>
                 <div className="border border-zinc-300 rounded-lg p-3 bg-zinc-50">
                     <div className="flex flex-wrap gap-4">
-                        {ROLES.map(role => (
+                        {availableRoles.map(role => (
                             <div key={role.value} className="flex items-center gap-2">
                                 <input
                                     id={`role-${role.value}`}

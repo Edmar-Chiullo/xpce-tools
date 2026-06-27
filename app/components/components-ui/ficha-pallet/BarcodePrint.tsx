@@ -20,8 +20,11 @@ export default function BarcodePrint({ data }: { data: BarcodeData[] }) {
    const handlePrint = useReactToPrint({
     contentRef,
     documentTitle: 'Etiquetas',
+    pageStyle: '@page { size: A4 landscape; margin: 10mm; }',
     onAfterPrint: () => console.log('Impressão concluída'),
   })
+
+
 
 
   useEffect(() => {

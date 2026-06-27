@@ -3,6 +3,7 @@
 import JsBarcode from 'jsbarcode'
 import { useEffect, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
+import Image from 'next/image'
 
 interface BarcodeData {
   Filial: string
@@ -40,6 +41,15 @@ export default function TargetBarcodePrint({ data }: { data: BarcodeData[] }) {
         <div className="overflow-x-hidden overflow-y-auto">
           {data.map((item, i) => (
             <div key={i} className="page-break flex flex-col items-start justify-end p-4 md:p-[30px]">
+              <div className='flex justify-start w-full mb-4'>
+                <Image
+                  src={'/logo-muffato.png'}
+                  width={200}
+                  height={100}
+                  alt="Logo"
+                  className="w-32 md:w-48 h-auto"
+                />
+              </div>
               <div className="flex flex-col sm:flex-row gap-1 sm:gap-[4px] mt-[6px]">
                 <div className='flex flex-col items-end w-full'>
                   <h3 className='mr-10'>Filial:</h3>

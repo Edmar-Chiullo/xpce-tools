@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react"
 import { signOut } from "next-auth/react"
 
-const IDLE_TIMEOUT = 10 * 60 * 1000
+const IDLE_TIMEOUT = 5 * 60 * 1000
 const EVENTS = ['mousemove', 'keydown', 'click', 'touchstart', 'scan']
 
 export function useIdleLogout() {

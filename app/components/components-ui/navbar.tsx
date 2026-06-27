@@ -21,13 +21,14 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/pages/kit-ferramentas", label: "Ferramentas", icon: Wrench, permissions: ["admin", "gerente", "pce-analytics", "pce-operation"] },
   { href: "/pages/utilitarios", label: "Utilitários", icon: Printer, permissions: ["admin", "gerente", "pce-analytics", "pce-operation"] },
   { href: "/pages/docs", label: "Documentação", icon: BookOpen, permissions: ["admin", "gerente", "pce-analytics", "pce-operation"] },
-  { href: "/pages/users", label: "Usuários", icon: Users, permissions: ["admin", "gerente"] },
+  { href: "/pages/users", label: "Usuários", icon: Users, permissions: ["admin", "gerente", "pce-analytics2"] },
   { href: "/pages/admin/migrate", label: "Migração", icon: Settings, permissions: ["admin"] },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
   admin: "Administrador",
   gerente: "Gerente",
+  "pce-analytics2": "Ana. Logística 2",
   "pce-analytics": "Analista",
   "pce-operation": "Auxiliar",
 }

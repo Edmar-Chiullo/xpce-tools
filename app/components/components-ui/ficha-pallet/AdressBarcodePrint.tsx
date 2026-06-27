@@ -1,7 +1,7 @@
 'use client'
 
 import JsBarcode from 'jsbarcode'
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { useReactToPrint } from 'react-to-print'
 
 interface BarcodeData {
@@ -37,6 +37,14 @@ export default function AdressPrintBarcode({ data }: { data: BarcodeData[] }) {
 
   const groupedData = useMemo(() => groupDataByEndereco(data), [data])
 
+  const pairs = useMemo(() => {
+    const result: GroupedData[][] = []
+    for (let i = 0; i < groupedData.length; i += 2) {
+      result.push(groupedData.slice(i, i + 2))
+    }
+    return result
+  }, [groupedData])
+
   const handlePrint = useReactToPrint({
     contentRef,
     documentTitle: 'Identificação prod. end.',
@@ -54,8 +62,8 @@ export default function AdressPrintBarcode({ data }: { data: BarcodeData[] }) {
           JsBarcode(barcodeElement, item.Codigo.trim(), {
             format: 'CODE128',
             displayValue: true,
-            height: 100,
-            width: 6,
+            height: 80,
+            width: 4,
           })
         }
       })
@@ -72,35 +80,39 @@ export default function AdressPrintBarcode({ data }: { data: BarcodeData[] }) {
       </button>
 
       <div ref={contentRef}>
-          <div className="flex flex-col items-center p-4 md:p-[30px] overflow-x-hidden">
-            
-            {groupedData.map((grupo, grupoIndex) => (
-              <div 
-                key={grupoIndex} 
-                className='page-break w-full'
-                style={{ marginBottom: '120px' }}
-              >
-                <div style={{ padding: '10px 0', borderBottom: '2px solid #ccc', marginBottom: '10px' }}>
-                    <h1 className='text-lg md:text-xl font-bold'>Endereço: {grupo.Endereco.trim()}</h1>
-                </div>
+          <div className="p-4 md:p-[30px] overflow-x-hidden">
+            {pairs.map((pair, pairIndex) => (
+              <div key={pairIndex} className="page-break">
+                <div className="grid grid-cols-2 gap-4">
+                  {pair.map((grupo, grupoIndex) => {
+                    const actualIndex = pairIndex * 2 + grupoIndex
+                    return (
+                      <div key={actualIndex} className="border border-zinc-300 rounded-md p-3 break-inside-avoid">
+                        <div style={{ padding: '8px 0', borderBottom: '2px solid #ccc', marginBottom: '8px' }}>
+                          <h1 className='text-base md:text-lg font-bold'>
+                            Endereço: {grupo.Endereco.trim()}
+                          </h1>
+                        </div>
 
-                {grupo.items.map((item, itemIndex) => (
-                    <div 
-                      key={itemIndex} 
-                      className="flex flex-col items-center gap-1"
-                      style={{ borderBottom: '1px dotted #eee' }}
-                    >
-                      <div style={{ flexGrow: 1 }}>
-                        <h1 className='text-xl md:text-4xl'>{item.Descricao.trim()}</h1>
+                        {grupo.items.map((item, itemIndex) => (
+                          <div key={itemIndex} className="flex flex-col items-center gap-1 mb-3">
+                            <div style={{ flexGrow: 1 }}>
+                              <h1 className='text-sm md:text-xl'>{item.Descricao.trim()}</h1>
+                            </div>
+                            
+                            <div className="flex items-center w-full max-w-full">
+                              <svg 
+                                id={`barcode-grupo-${actualIndex}-item-${itemIndex}`} 
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      
-                      <div className="flex items-center w-full md:min-w-[350px] max-w-full">
-                        <svg 
-                            id={`barcode-grupo-${grupoIndex}-item-${itemIndex}`} 
-                        />
-                      </div>
-                  </div>
-                ))}
+                    )
+                  })}
+                  {pair.length === 1 && <div />}
+                </div>
               </div>
             ))}
           </div>

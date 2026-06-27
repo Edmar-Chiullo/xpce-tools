@@ -4,7 +4,9 @@ const ACTIVITY_INITIALS: Record<string, string> = {
     'Aereo Vazio': 'AV',
     'Aéreo Vazio': 'AV',
     'Produto x Endereço': 'PE',
+    'Validação de Produto e Endereço': 'VPE',
     'Validação Master': 'VM',
+    'Validação Master de Expedição': 'VME',
 }
 
 export function generateActivityId(activityName: string): string {
